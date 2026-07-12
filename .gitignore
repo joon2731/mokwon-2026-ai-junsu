@@ -1,0 +1,16 @@
+# 대회 데이터 — 용량 + 재배포 금지
+data/
+
+# 실험 산출물 (스크립트로 재생성 가능)
+artifacts/
+stage/
+submissions/
+
+# 주최측 베이스라인 압축/전개본
+baseline_submit/
+*.zip
+
+# python
+__pycache__/
+*.pyc
+.venv/
