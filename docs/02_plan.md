@@ -23,6 +23,7 @@
 **서버**: Ubuntu 22.04 · T4 · torch 2.7.1 · transformers 4.46.3 기본 → Qwen3는 requirements로 **4.51.3 설치**(검증됨, torch 재설치 불필요). Qwen3-0.6B 단일 추론 **9:31/10분 — 여유 30초, 2모델 블렌드 불가**. 추론은 길이 내림차순 정렬 배칭 필수(오름차순은 VRAM 절벽). 5.13으로 저장한 모델은 rope_theta·extra_special_tokens 픽스 필요(`package_multi.py`에 내장) — 4.51.3으로 학습하면 해당 없음.
 
 **기각 목록 (재시도 금지)**: uniform fold-soup(LB −0.0075) · GBDT 스태킹 · 후처리 bias/LA/threshold(sqrt 가중 학습 모델에선 cross-fit ≤0) · 동사 룰(−0.0065) · tail-anchor 직렬화 V3(−0.001) · max_len 384(LB −0.005) · 마르코프/kNN/세션번호 · overlay.
+07-12 추가 기각 (Qwen3×XLM-R OOF 결합 실험): 2단계 로지스틱 스태킹 결합기 **+0.0008**뿐 · Qwen 예측 클래스 조건부 XLM-R 재판정 **+0.00004** · TF-IDF char3-5+LinearSVC nav 전문가 오버라이드 **0.7679→0.7208 대폭 하락**. 결론: 기존 두 모델의 결합·후처리·표면 전문가로는 oracle 상한(0.8028)을 회수할 수 없음.
 
 **재사용 자산**: 학습된 5-fold 모델+OOF(`dacon/artifacts/`), train.py·script.py·package_multi.py·prune_qwen.py·bench_infer.py(`dacon/work/`), 로컬 가중치(`dacon/pretrained/Qwen3-0.6B-Base`), train_prepared.parquet(70k, fold 포함).
 
@@ -51,9 +52,11 @@
 | **Qwen3-Embedding-0.6B checkpoint 교체 fold0** | 0~+0.01 | ROADMAP_080 1순위. 같은 0.6B/28층이라 제출 비용 동일, multilingual·code·분류 후학습 출발점. 근거 논문(arXiv 2607.03801) 실재 확인. 07-12 밤 체인 슬롯 A. 게이트 +0.003 |
 | **Qwen3 lr 4e-5 fold0 프로브** | 0~+0.01 | XLM-R에선 +0.0098. 07-12 밤 체인 슬롯 B. 게이트 +0.002 |
 | **ONNX 추론 가속 → Qwen3×XLM-R 블렌드** | +0.002~0.004 | 블렌드 OOF +0.0034 재현. Qwen3 T4 환산 ≤7분이면 채택. 7/13 낮 CPU 병행 |
-| 혼동집합 조건부 CE (그룹 softmax 보조 손실) | +0.002~0.005 추정 | ROADMAP_080 2순위. 추론 비용 0, loss 패치 필요(~30분). 7/13 낮 슬롯 후보 |
-| OOF/1.7B 교사 증류 | +0.002~0.01 | 소: OOF 다중교사(안전). 대: Qwen3-1.7B 교사(로컬 전용, 제출은 0.6B 학생) — 교사 fold0 8~14h라 **7/13 오전에 착수 여부 결정** (본선권 0.79307 기준 작은 카드 합산이 부족할 때의 승부수). 교사 게이트 0.785 |
+| 혼동집합 조건부 CE (그룹 softmax 보조 손실) | +0.002~0.005 추정 | 추론 비용 0. `CE_total = CE14 + λ·CE_group` (정답이 속한 그룹 내부만 재-softmax), λ∈{0.2, 0.4} fold0 1회 판정. 그룹: nav(glob/grep/list/read) · verify(lint/run_bash/run_tests) · dialogue(ask/plan/respond) · modify(apply/edit/write). 교사 실패 시 후퇴 카드 |
+| **1.7B 교사 → 0.6B 학생 증류 (주력)** | 0.80 도달의 승부수 | Qwen3-1.7B는 로컬 교사 전용(1GB/10분 제한 무관), 제출은 0.6B 학생. 교사 fold0 게이트 **0.785**(권장 0.79+) 통과 시에만 70k 로짓 생성→증류 진행. 근거: 0.6B/1.7B에서 classification-head가 생성식보다 +2~3%(arXiv 2607.03801, 실재 확인). 07-12 밤 체인에서 교사 학습 시작 |
+| OOF 다중교사 증류 (후퇴 카드) | +0.002~0.003 | 교사 게이트 실패 시: Qwen3+XLM-R 5-fold OOF soft logits를 교사로, `loss = 0.7·CE + 0.3·T²·KL` (T=2~3). fold0 게이트 +0.002 |
 | au prior | (이미 확보) | 탑재 유지. LB +0.0055 실측 |
+| (보류) 외부 API paraphrase 증강 | 불확실 | 혼동 클래스·turn0-1 라벨 보존 증강. 규칙상 허용(출처 명시 의무)이나 분포 불일치 위험 — 위 카드들 소진 후에만 |
 
 기각 (07-13 새벽 정량 분석, scratchpad/cue_analysis.py): **verify-cue 직렬화** — lint 정답 중 표면 단서가 있는 샘플(n=985)은 이미 recall 0.76~0.78로 소화되고 있고, 취약 구간(recall 0.589, n=1,041)은 단서 자체가 없어 태그로 줄 정보가 없음. 단서가 있어도 정답이 run_bash/lint/run_tests로 삼분(23/23/21%)되어 결정력 부족. 기대 이득 +0.001~0.003 < 게이트.
 

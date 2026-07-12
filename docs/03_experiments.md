@@ -46,9 +46,17 @@
 
 ### E100 — Qwen3-0.6B full-data 재학습 (진행 중, 07-12 밤 발사)
 - 가설: 이전 프로젝트 제출은 전부 80% fold 모델 → 100% 데이터 재학습으로 +0.003~0.008
-- 구성: dacon/work/train_full.py --tag qwen3_full3ep (검증 레시피 그대로, eval 없음, 3ep cosine)
+- 구성: dacon/work/train_full.py --tag qwen3_full3ep (검증 레시피 그대로, eval 없음, 3ep cosine). 6,561스텝, 저장 `dacon/artifacts/models/qwen3_full3ep_full_best`
 - 근거: E000에서 CV(80%) 0.426 vs 주최측 zip(100%) LB 0.436 오프셋 실측, Qwen CV↔LB 갭 0
+- 주의: full-data 모델은 정직한 CV가 없음 — 판정은 서버 LB로만. **LB 확인 전 기존 submit.zip(0.7677) 덮어쓰기 금지**
 - 결과: (아침에 기록)
+
+### R101~R103 — Qwen3×XLM-R 결합 한계 실험 (07-12 저녁, GPT 세션 · OOF 기반 CPU)
+- 배경: oracle 선택기(둘 중 하나라도 맞으면 정답) macro **0.8028** / either-correct 80.06% — 다양성 안에 0.80 존재 (07-12 재현 검증 완료)
+- R101 2단계 로지스틱 스태킹(logits+turn/meta, 그룹 CV): **0.7709 (+0.0008)** — 기각
+- R102 Qwen 예측 클래스 조건부 XLM-R 재판정: 최고 조합 **+0.00004** — 기각
+- R103 TF-IDF char3-5+LinearSVC nav 전문가 오버라이드: **0.7679 → 0.7208** — 기각 (표면 전문가가 문맥 정답 파괴)
+- 결론: 결합·후처리로는 oracle 회수 불가 → 더 강한 단일 표현(1.7B 교사 증류) 경로 채택. 주의: 이 실험들은 스크립트 미보존(재현 시 재작성 필요)
 
 ### 템플릿 (복사용)
 
