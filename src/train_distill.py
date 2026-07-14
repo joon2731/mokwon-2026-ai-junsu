@@ -6,7 +6,7 @@
 
 실행: python src\\train_distill.py --tag qwen3_distill --grad_ckpt
 전제: da2/artifacts/teacher_logits.npz (gen_teacher_logits.py 산출)
-저장: dacon/artifacts/models/{tag}_full_best (기존 프루닝·패키징 경로 재사용 목적)
+저장: artifacts/models/{tag}_full_best (기존 프루닝·패키징 경로 재사용 목적)
 """
 import argparse
 import json
@@ -19,13 +19,13 @@ from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
                           DataCollatorWithPadding, Trainer, TrainingArguments,
                           set_seed)
 
-DACON_ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+DACON_ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 DA2_ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 
 
 def get_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--model", default=r"C:\Users\joon2\Desktop\dacon\pretrained\Qwen3-0.6B-Base")
+    p.add_argument("--model", default=r"C:\Users\joon2\Desktop\da2\pretrained\Qwen3-0.6B-Base")
     p.add_argument("--teacher_npz", default=os.path.join(DA2_ART, "teacher_logits.npz"))
     p.add_argument("--temperature", type=float, default=3.0)
     p.add_argument("--alpha", type=float, default=0.6, help="CE 비중 (KL은 1-α)")

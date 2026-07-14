@@ -1,7 +1,8 @@
 ﻿# 전략 & 실행 계획
 
-> 07-12 개정: 이전 작업 폴더 `C:\Users\joon2\Desktop\dacon\`(같은 대회, LB 0.7677에서 중단)의
-> 실험 결과를 반영. 엔진은 Qwen3-0.6B-Base로 확정, 인코더 노선은 제외. 근거 원문: `dacon/PROGRESS.md`.
+> 07-12 개정: 이전 작업 폴더(구 `Desktop\dacon` — **07-15에 da2로 통합·삭제됨**, 기록은 `legacy/PROGRESS.md`)의
+> 실험 결과를 반영. 엔진은 Qwen3-0.6B-Base로 확정, 인코더 노선은 제외.
+> **⚠️ 이 문서는 대회 진행 중 기록이다. 종료 후 복기·재현은 [05_retrospective.md](05_retrospective.md)를 먼저 볼 것.**
 
 ## ▶ 재개 지침 (07-14 21:00 기준 — 새 세션은 여기부터)
 
@@ -54,7 +55,7 @@
 
 **엔진 서열** (fold0 CV): Qwen3-0.6B-Base **0.7679** (5-fold OOF 0.7701) > Qwen2.5-Coder-0.5B 0.7571 > XLM-R base 최적화 0.7278 > mdeberta 0.68 (bf16는 NaN). 1.5B 이상은 T4 추론 속도벽으로 제출 불가 → **0.6B dense가 천장**.
 
-**확정 레시피**: Qwen3-0.6B-Base · V2 직렬화(`dacon/work/featurize.py`) · max_len 512 · **3ep** (4ep는 −0.006, cosine anneal 특성) · bs8 ga4 · lr 2e-5 · warmup 0.1 · wd 0.01 · sqrt 클래스가중 · bf16 · grad_ckpt · adamw_bnb_8bit · seed 42.
+**확정 레시피**: Qwen3-0.6B-Base · V2 직렬화(`work/featurize.py`) · max_len 512 · **3ep** (4ep는 −0.006, cosine anneal 특성) · bs8 ga4 · lr 2e-5 · warmup 0.1 · wd 0.01 · sqrt 클래스가중 · bf16 · grad_ckpt · adamw_bnb_8bit · seed 42.
 
 **숨은 테스트**: ~30k 샘플 · 세션당 1스텝 · train 세션과 완전 분리(overlay 프로브 2회 확정) · au 세그먼트(`sess_au_*`, train 7.2%)가 테스트에선 ~15% 추정. **au 턴버킷 prior는 LB +0.0055 — 항상 탑재**(`au_bias.json`).
 
@@ -66,7 +67,7 @@
 07-12 추가 기각 (Qwen3×XLM-R OOF 결합 실험): 2단계 로지스틱 스태킹 결합기 **+0.0008**뿐 · Qwen 예측 클래스 조건부 XLM-R 재판정 **+0.00004** · TF-IDF char3-5+LinearSVC nav 전문가 오버라이드 **0.7679→0.7208 대폭 하락**. 결론: 기존 두 모델의 결합·후처리·표면 전문가로는 oracle 상한(0.8028)을 회수할 수 없음.
 07-13 추가 기각 (시프트-매칭 의사-테스트, R104): **EM prior 적응 −0.009** · 전역 F1-bias −0.0003 · turn-조건부 bias +0.0001 — 테스트 분포 시프트(1스텝/세션, au 15%)를 반영해도 au-조건부 bias(+0.0055, 기탑재) 외의 후처리는 전이 안 됨.
 
-**재사용 자산**: 학습된 5-fold 모델+OOF(`dacon/artifacts/`), train.py·script.py·package_multi.py·prune_qwen.py·bench_infer.py(`dacon/work/`), 로컬 가중치(`dacon/pretrained/Qwen3-0.6B-Base`), train_prepared.parquet(70k, fold 포함).
+**재사용 자산**: 학습된 5-fold 모델+OOF(`artifacts/`), train.py·script.py·package_multi.py·prune_qwen.py·bench_infer.py(`work/`), 로컬 가중치(`pretrained/Qwen3-0.6B-Base`), train_prepared.parquet(70k, fold 포함).
 
 ## 이전 프로젝트 결론 검증 (07-13 새벽, OOF 재계산 — scratchpad/verify_prior.py)
 
@@ -163,6 +164,6 @@ GPT 리포트가 내 리서치의 맹점을 찌른 것 (실측이 뒷받침):
 | 07-12 | CV = 5-fold GroupKFold(session), seed 42. 단 Qwen 계열은 이전 프로젝트 스플릿(parquet의 fold 컬럼)을 그대로 사용 | 그쪽 OOF/모델과 정합 유지 |
 | 07-12 | 학습 정밀도 bf16 (mdeberta fp16/bf16 불안정) | 이전 프로젝트 NaN 실측 + 리서치 |
 | 07-12 | 인코더 노선(mdeberta/mbert/klue) 제외, 엔진 = Qwen3-0.6B-Base | 이전 프로젝트 실측: 인코더 최고치 대비 +0.03 이상 |
-| 07-12 | 트랜스포머 학습은 dacon/work 파이프라인 사용, da2/src는 EDA·평가용 | 검증된 코드 재사용, 마감 3일 |
+| 07-12 | 트랜스포머 학습은 work/ 파이프라인 사용, da2/src는 EDA·평가용 | 검증된 코드 재사용, 마감 3일 |
 | 07-12 | full-data 재학습을 1순위 레버로 | 이전 제출이 전부 80% fold 모델, 갭 실측 +0.01 |
 | 07-12 | transformers 4.51.3 로컬 고정 (5.13 금지) | 5.13 학습 실패 이력(da2 docs/03 디버깅 기록) + 서버 설치 버전과 일치 |

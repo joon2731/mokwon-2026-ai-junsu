@@ -1,0 +1,40 @@
+sess_au rows: 5025 (7.2%)  sim rows: 64975
+au sessions: 1099  sim sessions: 8330
+au rows/session: 4.57  sim: 7.80
+label dist L1(au, sim) = 0.4228  (0.02 미만=동일 분포)
+  class          sim    au
+  apply_patch        0.071  0.038 <-- diff
+  ask_user           0.040  0.019 <-- diff
+  edit_file          0.158  0.176
+  glob_pattern       0.080  0.018 <-- diff
+  grep_search        0.144  0.109 <-- diff
+  lint_or_typecheck  0.031  0.056 <-- diff
+  list_directory     0.065  0.022 <-- diff
+  plan_task          0.039  0.034
+  read_file          0.123  0.257 <-- diff
+  respond_only       0.074  0.069
+  run_bash           0.070  0.099 <-- diff
+  run_tests          0.065  0.066
+  web_search         0.018  0.023
+  write_file         0.022  0.016
+au language_pref: {'ko': 3128, 'en': 1192, 'mixed': 705}
+avg history turns: au=2.52 sim=3.54
+OOF fold0 sim: n=12970 macro=0.7372 acc=0.7447
+OOF fold0 au: n= 1030 macro=0.5515 acc=0.5961
+
+[sim only] label-dist L1 dev across session-number deciles: max=0.0528 (<0.02=신호없음)
+
+== train-side overlay (스텁 5행으로 메커니즘 확인) ==
+  sess_sim_20260522_006284-step_01: train에 같은 세션 steps=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    -> step_2 history에서 step_1 행동 복원: **read_file**
+  sess_sim_20260522_002193-step_06: train에 같은 세션 steps=[1, 2, 3, 4, 5, 6, 7]
+    -> step_7 history에서 step_6 행동 복원: **web_search**
+  sess_sim_20260522_027895-step_06: train에 같은 세션 steps=[1, 2, 4, 5, 6, 7, 8, 9]
+    -> step_7 history에서 step_6 행동 복원: **run_bash**
+  sess_sim_20260522_025078-step_06: train에 같은 세션 steps=[1, 2, 3, 4, 5, 6, 7, 8]
+    -> step_7 history에서 step_6 행동 복원: **grep_search**
+  sess_sim_20260522_014415-step_06: train에 같은 세션 steps=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    -> step_7 history에서 step_6 행동 복원: **edit_file**
+
+스텁 5행 중 train-side 복원 가능 = 5
+주의: 스텁이 train에서 샘플된 예시일 가능성 있음. 히든 테스트 적용률은 제출 프로브로만 확정 가능.

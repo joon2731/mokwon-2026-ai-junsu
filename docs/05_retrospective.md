@@ -143,33 +143,40 @@ V3 tail-anchor 직렬화(−0.001) · verify-cue 태그 · result_summary 상태
 
 ## 7. 남긴 자산 (재현·비교용)
 
-| 자산 | 경로 | 용도 |
+> **07-15 저장소 통합**: 이전 프로젝트 폴더(`Desktop\dacon`)를 삭제하고 필요한 것을 전부 **`Desktop\da2` 한 곳으로 이동**했다. 코드의 하드코딩 경로도 전부 da2 기준으로 수정 완료(67개 파일). **이제 da2만 있으면 전부 재현된다.**
+
+| 자산 | 경로 (모두 `da2/` 아래) | 용도 |
 |---|---|---|
-| **최종 제출물** | `da2/submit_distill_au07.zip` (802MB) | 제출 그대로. script.py·model·requirements 포함 |
-| **최종 모델** | `dacon/artifacts/models/qwen3_distill3w_full_best` (2.3G) | 프루닝 전 원본 |
-| └ 프루닝본 | `..._full_best_pruned` (879M) | zip에 들어간 것 |
-| **학습 데이터** | `da2/data/` · `dacon/artifacts/train_prepared.parquet` (70k, fold 포함) | 재학습·재분석 |
-| **교사 로짓** | `da2/artifacts/teacher_logits_3way.npz` | 증류 재현 (교사 macro 0.7754) |
-| **OOF** | `dacon/artifacts/oof/*.npz` (57MB) | Qwen3/XLM-R/mmBERT 5-fold — **오차 분석 재현용** |
-| **베이스 모델** | `dacon/pretrained/Qwen3-0.6B-Base` (1.2G) | 재학습 출발점 |
-| **코드** | `da2/src/` · `dacon/work/` | 학습·증류·프루닝·패키징·진단 |
-| **au_bias** | `dacon/artifacts/au_bias.json` | ×1.0 원본 (최종 제출은 ×0.7 적용본) |
+| **최종 제출물** | `submit_distill_au07.zip` (802MB) | 제출 그대로. script.py·model·requirements 포함 |
+| **최종 모델** | `artifacts/models/qwen3_distill3w_full_best` (2.3G) | 프루닝 전 원본 |
+| └ 프루닝본 | `artifacts/models/qwen3_distill3w_full_best_pruned` (879M) | zip에 들어간 것 |
+| **학습 데이터** | `data/` · `artifacts/train_prepared.parquet` (70k, fold 컬럼 포함) | 재학습·재분석 |
+| **교사 로짓** | `artifacts/teacher_logits_3way.npz` | 증류 재현 (교사 macro 0.7754) |
+| **OOF** | `artifacts/oof/*.npz` (43개, 57MB) | Qwen3/XLM-R/mmBERT 5-fold — **오차 분석 재현용** |
+| **베이스 모델** | `pretrained/Qwen3-0.6B-Base` (1.2G) | 재학습 출발점 |
+| **파이프라인 코드** | `work/` (58개 .py) | train·train_full·featurize(V2 직렬화)·script(추론)·package_multi·prune_qwen·bench_infer |
+| **실험 코드** | `src/` | 증류·group CE·오차진단·후처리 실험 |
+| **au_bias** | `artifacts/au_bias.json` | ×1.0 원본 (최종 제출은 ×0.7 적용본) |
+| **이전 프로젝트 기록** | `legacy/PROGRESS.md` 외 md 6개 | 07-09 이전 실험 전체 기록 (복기 자료) |
+| **분석 산출물** | `legacy/analysis/` (20개) | **`sample_serialized.txt` = V2 직렬화 실제 예시** (수상팀 입력표현 비교용), 오차 분석, 블렌드 기록 |
 
-**정리됨(삭제)**: 실패 실험 모델 109개(241GB), 미사용 zip 6개, 기각된 pretrained 5개(9.8GB). 전부 코드+데이터로 재생성 가능.
+**정리됨(삭제)**: 실패 실험 모델 109개(241GB) · 미사용 zip 6개 · 기각된 pretrained 5개 · dacon 폴더 전체(11.1GB). 전부 코드+데이터로 재생성 가능. 총 **264GB 회수** (디스크 여유 245GB → 509GB).
 
-### 재현 절차
+### 재현 절차 (da2 루트에서)
 ```powershell
-# 1) 증류 학습 (3-way 교사)
+# 1) 증류 학습 (3-way 교사) — ~4.5h
 python src\train_distill.py --teacher_npz artifacts\teacher_logits_3way.npz --tag repro --grad_ckpt
 # 2) 임베딩 프루닝 (로짓 동치 검증 포함)
-python C:\Users\joon2\Desktop\dacon\work\prune_qwen.py repro_full_best
+python work\prune_qwen.py repro_full_best
 # 3) au_bias ×0.7 적용 후 패키징
-#    au_bias.json의 au_bias_low/high에 ×0.7 → package_multi.py --single_model repro_full_best_pruned --req_tf451 --au
+#    artifacts\au_bias.json 의 au_bias_low/high 에 ×0.7 → 아래 실행
+python work\package_multi.py --single_model repro_full_best_pruned --req_tf451 --au --out submit_repro.zip
 ```
+⚠️ 학습 시 **GPU 무휴식 풀로드 10h 초과 금지** (§8-6 PCIe 사고). 긴 체인에는 냉각 간격을 넣을 것.
 
-### 오차 진단 재현
+### 오차 진단 재현 (§5의 모든 수치)
 ```powershell
-python src\complementarity_diag.py   # nav 병목·94% 그룹내·step별 정보한계 재현
+python src\complementarity_diag.py   # nav 병목·오답 94% 그룹내·step별 정보한계 재현
 ```
 
 ## 8. 프로세스 교훈

@@ -14,8 +14,8 @@ Confusion groups (docs/02_plan.md):
   web      = web_search  (singleton -> CE_group == 0 for those samples)
 
 Base recipe is the validated full-FT recipe; only --group_ce_lambda is new.
-Fork of dacon/work/train.py (read-only archive) per da2 file-location rule.
-Artifacts still land in dacon/artifacts/{models,oof} for package_multi compat.
+Fork of work/train.py (read-only archive) per da2 file-location rule.
+Artifacts still land in artifacts/{models,oof} for package_multi compat.
 """
 import argparse
 import json
@@ -29,7 +29,7 @@ from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
                           DataCollatorWithPadding, Trainer, TrainingArguments,
                           set_seed)
 
-ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 
 # class-name -> confusion group (docs/02_plan.md). web_search is its own singleton.
 GROUP_MAP = {
@@ -44,7 +44,7 @@ GROUP_TO_ID = {"nav": 0, "verify": 1, "dialogue": 2, "modify": 3, "web": 4}
 
 def get_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--model", default=r"C:\Users\joon2\Desktop\dacon\pretrained\Qwen3-0.6B-Base")
+    p.add_argument("--model", default=r"C:\Users\joon2\Desktop\da2\pretrained\Qwen3-0.6B-Base")
     p.add_argument("--fold", type=int, default=0)
     p.add_argument("--max_len", type=int, default=512)
     p.add_argument("--epochs", type=float, default=3.0)
@@ -70,7 +70,7 @@ def get_args():
 class GroupCETrainer(Trainer):
     def __init__(self, class_weights=None, group_ids=None, group_ce_lambda=0.0, **kw):
         super().__init__(**kw)
-        # keep the classic mean/grad-accum loss contract (see dacon/work/train.py note)
+        # keep the classic mean/grad-accum loss contract (see work/train.py note)
         self.model_accepts_loss_kwargs = False
         self.class_weights = class_weights
         self.group_ids = group_ids            # LongTensor [n_cls]

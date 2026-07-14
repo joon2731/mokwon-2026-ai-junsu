@@ -1,0 +1,11 @@
+{
+  "tags": [
+    "qwen05_smoke",
+    "xlmr_v2_rdrop_lr4_e4"
+  ],
+  "weights": [
+    0.6268,
+    0.3732
+  ],
+  "in_sample": 0.7666
+}

@@ -1,0 +1,133 @@
+rows=70000  classes=14
+
+========================================================================
+== A_markov
+========================================================================
+(cross-fit majority per context; fallback=global majority)
+  last1 action                                 macro=0.1371 acc=0.2294 cov=1.000
+  last2 actions                                macro=0.1936 acc=0.2795 cov=1.000
+
+  P(y | last1) top transitions (n>=2000):
+    last=edit_file          n=10620  run_tests:0.23  edit_file:0.15  apply_patch:0.10
+    last=grep_search        n= 9412  edit_file:0.22  read_file:0.19  grep_search:0.18
+    last=<none>             n= 9000  list_directory:0.20  read_file:0.17  plan_task:0.12
+    last=read_file          n= 8887  edit_file:0.29  grep_search:0.15  read_file:0.14
+    last=glob_pattern       n= 4967  grep_search:0.22  glob_pattern:0.18  read_file:0.16
+    last=run_bash           n= 4797  run_bash:0.20  edit_file:0.18  read_file:0.11
+    last=apply_patch        n= 4417  lint_or_typecheck:0.17  respond_only:0.16  apply_patch:0.16
+    last=run_tests          n= 4251  edit_file:0.24  respond_only:0.18  grep_search:0.13
+    last=list_directory     n= 4223  read_file:0.25  grep_search:0.21  glob_pattern:0.11
+    last=plan_task          n= 2584  apply_patch:0.18  read_file:0.17  list_directory:0.17
+    last=ask_user           n= 2192  grep_search:0.20  read_file:0.15  edit_file:0.14
+    last=lint_or_typecheck  n= 2016  apply_patch:0.25  edit_file:0.22  respond_only:0.10
+    last=write_file         n= 1446  edit_file:0.40  run_bash:0.29  read_file:0.07
+    last=web_search         n= 1188  edit_file:0.19  grep_search:0.16  respond_only:0.12
+
+========================================================================
+== A2_result_features
+========================================================================
+  last1+result-status                          macro=0.1424 acc=0.2322 cov=1.000
+
+  interesting conditionals (same action, different result):
+    last=grep_search        res=other   n= 4369  edit_file:0.22  grep_search:0.20  read_file:0.18
+    last=grep_search        res=match+  n= 4004  read_file:0.22  edit_file:0.22  grep_search:0.18
+    last=grep_search        res=0match  n=  694  glob_pattern:0.24  edit_file:0.23  read_file:0.14
+    last=grep_search        res=error   n=  345  grep_search:0.21  read_file:0.20  edit_file:0.19
+    last=run_tests          res=PASS    n= 2901  respond_only:0.26  edit_file:0.20  run_tests:0.12
+    last=run_tests          res=FAIL    n= 1350  edit_file:0.33  grep_search:0.15  apply_patch:0.13
+    last=run_bash           res=other   n= 2370  run_bash:0.21  edit_file:0.17  read_file:0.12
+    last=run_bash           res=ok      n= 1791  run_bash:0.21  edit_file:0.20  read_file:0.10
+    last=run_bash           res=error   n=  636  grep_search:0.18  edit_file:0.17  run_bash:0.17
+    last=glob_pattern       res=other   n= 4967  grep_search:0.22  glob_pattern:0.18  read_file:0.16
+    last=lint_or_typecheck  res=ok      n= 1329  apply_patch:0.22  edit_file:0.16  respond_only:0.14
+    last=lint_or_typecheck  res=error   n=  687  edit_file:0.32  apply_patch:0.31  read_file:0.08
+
+========================================================================
+== B_templates
+========================================================================
+  prompt skeletons: 63250 unique / 70000  (dup rate 9.6%)
+  skeleton (cross-fit)                         macro=0.1348 acc=0.2196 cov=0.135
+  skeleton (IN-SAMPLE ceiling proxy)           macro=0.9557 acc=0.9624 
+  skeleton+last1 (cross-fit)                   macro=0.0688 acc=0.1853 cov=0.039
+  skeleton+last1 (IN-SAMPLE)                   macro=0.9918 acc=0.9936 
+
+  groups(n>=20): 16  covering 1063 rows
+  purity: mean=1.000  p10=1.000 p50=1.000 p90=1.000
+  (purity ~1.0 = 규칙 결정적, ~0.5 = 라벨 확률적 → 천장)
+    ambiguous n= 142: '큰 도움이 됐어, 지금까지 진행한 내용 한번 정리해줄래?' -> respond_only:1.00
+    ambiguous n=  86: '여기까지 하면 될 것 같아, 진행한 거 요약해줘' -> respond_only:1.00
+    ambiguous n=  92: '오늘은 여기까지 하고 정리 좀 부탁해' -> respond_only:1.00
+    ambiguous n=  67: '좋아 이제 마무리하고 지금까지 한 거 정리해줘' -> respond_only:1.00
+    ambiguous n=  69: '자 이제 마무리하자, 지금까지 한 거 요약해줘' -> respond_only:1.00
+
+========================================================================
+== C_ids
+========================================================================
+!! SECTION FAILED
+Traceback (most recent call last):
+  File "C:\Users\joon2\Desktop\dacon\work\analysis_0707.py", line 37, in wrap
+    fn(*a, **k)
+    ~~^^^^^^^^^
+  File "C:\Users\joon2\Desktop\dacon\work\analysis_0707.py", line 210, in C_ids
+    dates.append(m.group(1)); snum.append(int(m.group(2))); steps.append(int(m.group(3)))
+                 ^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'group'
+
+
+========================================================================
+== D_knn
+========================================================================
+  tfidf: train (56000, 109333), val (14000, 109333)
+  kNN(k=25, char 3-4) fold-0: macro=0.1944 acc=0.2044   (모델 0.7278 대비)
+  exact-text dup: 0/14000 val rows (0.0%), label-agree 0/1 = 0.0%
+
+========================================================================
+== EF_oof
+========================================================================
+  fold0 OOF n=14000  macro=0.7278
+
+  by language_pref:
+    en     n= 3788 macro=0.7359 acc=0.7413
+    ko     n= 8700 macro=0.7262 acc=0.7324
+    mixed  n= 1512 macro=0.7122 acc=0.7229
+
+  by turn bucket:
+    turn 0-1: n= 1803 macro=0.4011 acc=0.5630
+    turn 2-3: n= 3455 macro=0.6888 acc=0.7080
+    turn 4-5: n= 3105 macro=0.7191 acc=0.7717
+    turn 6-99: n= 5637 macro=0.6881 acc=0.7834
+
+  top confusions (true -> pred, count):
+    grep_search        -> read_file           460
+    read_file          -> list_directory      428
+    read_file          -> grep_search         354
+    grep_search        -> list_directory      296
+    glob_pattern       -> list_directory      169
+    run_bash           -> run_tests           167
+    list_directory     -> read_file           164
+    glob_pattern       -> read_file           150
+    ask_user           -> plan_task           134
+    lint_or_typecheck  -> run_tests           118
+    read_file          -> glob_pattern        110
+    run_tests          -> lint_or_typecheck   109
+    grep_search        -> glob_pattern        104
+    run_tests          -> run_bash             98
+    list_directory     -> grep_search          98
+
+  per-class F1:
+    apply_patch        0.955
+    ask_user           0.626
+    edit_file          0.977
+    glob_pattern       0.652
+    grep_search        0.608
+    lint_or_typecheck  0.596
+    list_directory     0.483
+    plan_task          0.683
+    read_file          0.531
+    respond_only       1.000
+    run_bash           0.781
+    run_tests          0.737
+    web_search         0.567
+    write_file         0.993
+
+DONE -> artifacts/analysis_0707.txt

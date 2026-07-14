@@ -1,0 +1,11 @@
+{
+  "tags": [
+    "xlmr_v2_rdrop",
+    "xlmr_v2_rdrop_lr4_e4"
+  ],
+  "weights": [
+    0.16,
+    0.84
+  ],
+  "in_sample": 0.7283
+}

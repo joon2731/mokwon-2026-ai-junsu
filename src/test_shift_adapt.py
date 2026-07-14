@@ -9,7 +9,7 @@ import json
 import numpy as np
 import pandas as pd
 
-ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 N_DRAWS = 20
 AU_SHARE = 0.15
 

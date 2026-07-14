@@ -1,0 +1,6 @@
+[2026-07-09 02:05:48] START qwen3_serial_v3 fold0 V3
+[2026-07-09 02:05:48] RUN C:\Users\joon2\AppData\Local\Programs\Python\Python313\python.exe work\prepare_data_v3.py --out C:\Users\joon2\Desktop\dacon\artifacts\train_prepared_serial_v3.parquet
+[2026-07-09 02:05:53] EXIT 0: C:\Users\joon2\AppData\Local\Programs\Python\Python313\python.exe work\prepare_data_v3.py --out C:\Users\joon2\Desktop\dacon\artifacts\train_prepared_serial_v3.parquet
+[2026-07-09 02:05:53] RUN C:\Users\joon2\AppData\Local\Programs\Python\Python313\python.exe work\train.py --model pretrained\Qwen3-0.6B-Base --fold 0 --max_len 512 --epochs 3 --bs 8 --grad_accum 4 --lr 2e-5 --warmup 0.1 --wd 0.01 --weighting sqrt --precision bf16 --grad_ckpt --optim adamw_bnb_8bit --tag qwen3_serial_v3 --data_path C:\Users\joon2\Desktop\dacon\artifacts\train_prepared_serial_v3.parquet
+[2026-07-09 05:43:41] EXIT 0: C:\Users\joon2\AppData\Local\Programs\Python\Python313\python.exe work\train.py --model pretrained\Qwen3-0.6B-Base --fold 0 --max_len 512 --epochs 3 --bs 8 --grad_accum 4 --lr 2e-5 --warmup 0.1 --wd 0.01 --weighting sqrt --precision bf16 --grad_ckpt --optim adamw_bnb_8bit --tag qwen3_serial_v3 --data_path C:\Users\joon2\Desktop\dacon\artifacts\train_prepared_serial_v3.parquet
+[2026-07-09 05:43:41] DONE training macro=0.766900 delta=-0.001024

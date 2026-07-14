@@ -12,7 +12,7 @@
 | SMK_MBERT | 07-12 | bert-base-multilingual-cased 2ep | now_first | 0.379 (6k, fold0만) | | | | 환경 판별용 |
 | SMK_KLUE | 07-12 | klue/roberta-base 2ep | now_first | 0.130 (6k) | | | | 영어/코드 혼합에 불리 |
 | SMK_MDEB | 07-12 | mdeberta-v3-base 2ep | now_first | 0.187 (6k) | | | | 이전 프로젝트에서도 최종 0.68로 열세 |
-| (이전) | ~07-09 | **Qwen3-0.6B-Base 3ep** (dacon/) | V2 | fold0 **0.7679** / 5-fold OOF **0.7701** | 0.7677 (fold0+au) | 839MB | 9:31 | 이전 기준선. dacon/PROGRESS.md |
+| (이전) | ~07-09 | **Qwen3-0.6B-Base 3ep** (이전 프로젝트, 현 legacy/) | V2 | fold0 **0.7679** / 5-fold OOF **0.7701** | 0.7677 (fold0+au) | 839MB | 9:31 | 이전 기준선. legacy/PROGRESS.md |
 | E100 | 07-13 | Qwen3-0.6B **full-data** 3ep + au | V2 | (홀드아웃 없음) | **0.77124** 🏆 | 841MB | 9:31 | **+0.0035 vs fold0. full-data 레버 실증. 현 기준선** |
 | E101 | 07-13 | Qwen3-**Embedding**-0.6B fold0 3ep | V2 | **0.7561** | | | | **기각** (Base 0.7679 대비 −0.0118, 게이트 미달). 에폭 곡선 0.7086→0.7540→0.7561 — 임베딩 후학습이 분류 fine-tuning 출발점으로 불리 |
 | E102 | 07-13 | **Qwen3-1.7B LoRA 교사** fold0 (r32 all-linear, lr1e-4, 3ep, 6.5h) | V2 | **0.7516** | | | | **기각** (게이트 0.785 미달, 0.6B full-FT보다 −0.016). 곡선 0.7074→0.7503→0.7516 + e3 loss 상승 = 수렴 후 정체. XLM-R-large(−0.006)와 동일 패턴 — **모델 확대는 이 태스크에서 통하지 않음(2회 재현)** |
@@ -59,11 +59,11 @@
 
 ### SMK_* — 백본 3파전 (6k 샘플, 2ep, 07-12 밤)
 - mbert-cased **0.379** / mdeberta 0.187 / klue-roberta 0.130 (동일 조건). mbert만 정상 학습 곡선.
-- 단, 직후 이전 프로젝트(dacon/) 발견으로 **인코더 노선 자체가 폐기** — Qwen3-0.6B(0.7679)가 모든 인코더를 +0.03 이상 상회함이 이미 실측돼 있었음. 이 레이스는 "이 환경에서 학습되는 모델" 판별용 기록으로만 의미.
+- 단, 직후 이전 프로젝트(이전 프로젝트, 현 legacy/) 발견으로 **인코더 노선 자체가 폐기** — Qwen3-0.6B(0.7679)가 모든 인코더를 +0.03 이상 상회함이 이미 실측돼 있었음. 이 레이스는 "이 환경에서 학습되는 모델" 판별용 기록으로만 의미.
 
 ### E100 — Qwen3-0.6B full-data 재학습 (진행 중, 07-12 밤 발사)
 - 가설: 이전 프로젝트 제출은 전부 80% fold 모델 → 100% 데이터 재학습으로 +0.003~0.008
-- 구성: dacon/work/train_full.py --tag qwen3_full3ep (검증 레시피 그대로, eval 없음, 3ep cosine). 6,561스텝, 저장 `dacon/artifacts/models/qwen3_full3ep_full_best`
+- 구성: work/train_full.py --tag qwen3_full3ep (검증 레시피 그대로, eval 없음, 3ep cosine). 6,561스텝, 저장 `artifacts/models/qwen3_full3ep_full_best`
 - 근거: E000에서 CV(80%) 0.426 vs 주최측 zip(100%) LB 0.436 오프셋 실측, Qwen CV↔LB 갭 0
 - 주의: full-data 모델은 정직한 CV가 없음 — 판정은 서버 LB로만.
 - 결과 (07-13 새벽 제출): **LB 0.7712407954, 런타임 9:31** — fold0(0.7677) 대비 **+0.0035**, 예상 범위(+0.003~0.008) 하단 적중. 신기록, 현 기준선. 프루닝 후 905MB/zip 841MB, 로짓 동치 max|Δ|=0
@@ -106,7 +106,7 @@
 ### E107 — 혼동집합 조건부 CE (07-14 오후, 진행 중)
 - 가설: 그룹 내부 경계(특히 nav 4-way: glob/grep/list/read)를 보조손실로 선명화 → macro-F1 +0.002~0.005. 추론 비용 0 (헤드 불변, 학습 그래디언트만 변형)
 - 변경점: `L = CE14 + λ·CE_group`, λ=0.3. CE_group = 정답이 속한 혼동그룹 내부만 재-softmax한 (class-weighted) NLL. 그룹: nav(glob/grep/list/read)·verify(lint/run_bash/run_tests)·dialogue(ask/plan/respond)·modify(apply/edit/write)·web(web_search 단독→기여 0)
-- 구현: `da2/src/train_group_ce.py` (dacon/work/train.py 포크, GroupCETrainer.compute_loss에 마스킹 NLL 추가). 마스킹·nll 로직 단위검증 통과(web 단독그룹 nll=0, 전부 유한). 배경: lr 실패로 오후 슬롯 재배정, 사용자 선택
+- 구현: `da2/src/train_group_ce.py` (work/train.py 포크, GroupCETrainer.compute_loss에 마스킹 NLL 추가). 마스킹·nll 로직 단위검증 통과(web 단독그룹 nll=0, 전부 유한). 배경: lr 실패로 오후 슬롯 재배정, 사용자 선택
 - 구성: Qwen3-0.6B-Base fold0, 검증 레시피(max_len512·3ep·bs8ga4·lr2e-5·sqrt·bf16·adamw_bnb_8bit·seed42) + group_ce_lambda 0.3. 게이트 fold0 ≥ 0.7699 (기준 0.7679)
 - 곡선(eval_macro_f1): e1 0.7155 → **e2 0.7634 (best)** → e3 0.7597. **게이트 0.7699 미달(−0.0065)**, 기준 0.7679 대비 **−0.0045**
 - 결론: **기각**. e3 하락 = group CE(λ0.3) 과조정 신호. R107 진단대로 "큰 병목=초기 nav 정보한계"라 그룹경계 보조손실이 순해로움. full-data 미발사, distill3w(0.77326) 확정. λ 튜닝(0.2) 여지는 있으나 진단상 상방 작음 — 오늘밤 full-data 시간 초과로 보류

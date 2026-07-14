@@ -1,0 +1,53 @@
+LABEL (정답, train_labels.csv에 별도 저장): read_file
+
+=== train.jsonl 한 줄 = 한 샘플 (아래는 보기 좋게 편집) ===
+
+{
+  "id": "sess_sim_20260522_014833-step_03",
+  "session_meta": {
+    "user_tier": "pro",
+    "language_pref": "ko",
+    "workspace": {
+      "language_mix": {
+        "yaml": 0.45,
+        "tf": 0.4,
+        "sh": 0.1,
+        "md": 0.05
+      },
+      "loc": 24382,
+      "git_dirty": true,
+      "open_files": [],
+      "last_ci_status": "passed"
+    },
+    "budget_tokens_remaining": 122410,
+    "turn_index": 3,
+    "elapsed_session_sec": 491
+  },
+  "history": [
+    {
+      "role": "user",
+      "content": "아 그리고 이거 한 번에 옮기면 사고나니까, 무슨 상태를 어떤 순서로 store로 올릴지 단계부터 잡아줘"
+    },
+    {
+      "role": "assistant_action",
+      "name": "plan_task",
+      "args": {
+        "goal": "k8s 신규 작업 정리"
+      },
+      "result_summary": "plan with 12 steps drafted"
+    },
+    {
+      "role": "user",
+      "content": "헐 3개 깨졌네ㅠ 어떤 케이스 깨졌는지 보게 k8s 파일 열어줘"
+    },
+    {
+      "role": "assistant_action",
+      "name": "list_directory",
+      "args": {
+        "path": "k8s"
+      },
+      "result_summary": "listed k8s: 9 items"
+    }
+  ],
+  "current_prompt": "오케이 롤백 어떻게 돌아가는거임 이거"
+}

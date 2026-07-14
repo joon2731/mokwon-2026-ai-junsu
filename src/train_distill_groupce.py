@@ -9,7 +9,7 @@ E107 full-data 경로 (fold0 게이트 통과 시). 현 최고 = E105 distill3w(
   CE_group = 정답이 속한 혼동그룹 내부만 재-softmax한 (class-weighted) NLL. 추론비용 0.
 
 교사 = teacher_logits_3way.npz (Qwen3×XLM-R×mmBERT OOF 블렌드, macro 0.7754).
-학생 레시피는 검증된 full-data 레시피 그대로. 저장: dacon/artifacts/models/{tag}_full_best.
+학생 레시피는 검증된 full-data 레시피 그대로. 저장: artifacts/models/{tag}_full_best.
 train_distill.py 포크 + group CE 항 (마스킹 로직은 train_group_ce.py와 동일).
 """
 import argparse
@@ -23,7 +23,7 @@ from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
                           DataCollatorWithPadding, Trainer, TrainingArguments,
                           set_seed)
 
-DACON_ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+DACON_ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 DA2_ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 
 # class-name -> confusion group (docs/02_plan.md). web_search is its own singleton.
@@ -39,7 +39,7 @@ GROUP_TO_ID = {"nav": 0, "verify": 1, "dialogue": 2, "modify": 3, "web": 4}
 
 def get_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--model", default=r"C:\Users\joon2\Desktop\dacon\pretrained\Qwen3-0.6B-Base")
+    p.add_argument("--model", default=r"C:\Users\joon2\Desktop\da2\pretrained\Qwen3-0.6B-Base")
     p.add_argument("--teacher_npz", default=os.path.join(DA2_ART, "teacher_logits_3way.npz"))
     p.add_argument("--temperature", type=float, default=3.0)
     p.add_argument("--alpha", type=float, default=0.6, help="CE 비중 (KL은 1-α)")

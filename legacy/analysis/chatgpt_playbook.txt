@@ -1,0 +1,255 @@
+
+===== PAGE 1 =====
+1. Winning‐solution “playbook” (noisy,
+imbalanced text tasks)
+Kaggle/DACON winners universally rely on ensembles and fine-grained calibration to squeeze out the
+last points. For example, one first‐place Kaggle solution reported adding a Bi-LSTM head on top of BERT
+and using Adversarial Weight Perturbation (AWP), which gave a CV rise from 0.858→0.861 (+0.003)
+【39†L237-L239】. Similarly, model ensembling is standard: competitors often average 10–20 models
+(or more) via weighted averaging or Weighted Box Fusion. Kaggle writeups report up to 19–38 models
+ensembling for 1–3% F1 gain【100†L232-L240】【101†L218-L226】. Simple “one-model” entries
+usually place far below finalists. Per-class calibration (threshold or logit bias tuning) is also widely used:
+adding small class-dependent biases typically nets another few 0.001–0.005 F1【39†L229-L235】. In
+short, the last 3–8% generally comes from very heavy ensembles (multi-seed, multi-fold, multi-
+architecture) and post-hoc threshold optimization. For instance, one solution used a 19-model weighted
+ensemble and a 10-model WBF ensemble to lift F1, and many teams report +0.005–0.01 gain from
+adversarial training/weight perturbation【39†L229-L239】【100†L232-L240】. No single trick gives
++0.05 by itself (outside pseudo-labeling), but combined they can move the needle by a few points.
+2. Compact models vs. XLM-R/DeBERTa under
+1GB
+Recent research suggests new encoders and LLM-based classifiers can match or beat XLM-R/DeBERTa
+at modest sizes. Notably, ModernBERT-base (149M params) achieves SOTA on GLUE benchmarks and is
+~2–4× faster than BERT/RoBERTa【45†L39-L44】【48†L662-L670】. ModernBERT-base even surpasses
+DeBERTaV3-base on GLUE【48†L662-L670】, implying it should at least tie XLM-R-base on classification.
+Its smaller size (139M vs. XLM-R’s 278M) also makes it a safe fit (<1GB). We expect a ModernBERT model to
+yield a modest lift (≈+0.01–0.02 F1) in place of XLM-R, with similar or faster inference (fits GPU easily).
+LoRA‐tuned causal LLMs are another promising avenue. A recent study fine-tuned small multi-lingual
+decoders (Qwen 0.6B–1.5B) with LoRA adapters and a linear classification head. The embedding-based
+approach (freezing most weights) matched or exceeded BERT performance on classification【49†L72-
+L81】. E.g. a 0.6B Qwen3 model achieved F1≈0.828 on a single-label task【51†L7-L10】, rivaling XLM-R
+(≈0.80). (Larger Qwen2.5/1.5B gave ~0.823–0.828【51†L1-L4】.) A 0.5–0.6B Qwen model in 4-bit
+precision plus ~40M LoRA parameters could fit under 1GB and run on a T4, yielding a competitive
+classifier. Thus small LLM + LoRA is worth a try, though full 1.5B models likely exceed 1GB.
+Embedding models like GTE or E5 (multilingual) provide another path. GTE-base (110M) “outperforms
+OpenAI’s large embedding model”【54†L33-L42】. One could freeze GTE/E5 embeddings and train a
+small downstream head. In principle, this approach is very fast (just an MLP on top) and well within size
+limits. However, no published results show these beat fine-tuned transformers on classification. We
+expect similar or slightly worse F1 than XLM-R, but they can serve as efficient baselines.
+Finally, Korean-specialized encoders (e.g. KoBERT, KLUE-BERT, KoELECTRA, KcBERT, etc.) could
+marginally improve understanding of Korean text. These models (110–120M) fit well, but in practice top
+Kaggle teams stick to multilingual or mixed models. Given our data is code-mixed, a Korean model alone
+1
+
+===== PAGE 2 =====
+may not beat XLM-R. It might help to ensemble one Korean model with multilingual ones, but gains are
+likely small (≪+0.01 F1).
+3. Noise-robust training (confusable classes)
+For classes with irreducible label noise, robust loss functions and training schemes can help preserve
+macro-F1. The Bi-Tempered Logistic Loss [Amid & Warmuth 2019] is specially designed for this: it
+“introduces bounded loss and heavy-tailed softmax” to resist noisy labels【74†L268-L277】【71†L173-
+L181】. In practice it significantly improves accuracy under label noise (e.g. from 97.6→98.6% on MNIST,
+and from 53.2→62.6% on CIFAR100)【74†L241-L250】. We expect a few percent gain on noisy text
+classes. Similarly, Generalized/Symmetric Cross-Entropy losses (Zhang & Sabuncu 2018; Wang et al.
+2019) interpolate between MAE and CE to temper the effect of outliers【78†L29-L38】【83†L29-L38】.
+These have shown empirical robustness and could be simply implemented.
+Other strategies: co-teaching (train two nets and filter noisy samples) can help if label noise is extreme,
+but adds complexity. Label smoothing provides minor regularization (usually <1% gain). Directly
+optimizing F1 (e.g. a soft‐F1 loss) is theoretically attractive but tricky; instead, we rely on usual CE-based
+training plus post-hoc thresholding. Logit adjustment for class imbalance (Menon et al.) can correct bias
+by modifying logits by class prior ratios; this may boost rare-class recall, but effects on macro-F1 are
+usually modest unless priors are extreme.
+In practice, bounded/tempered losses rank highest: e.g. Bi-Tempered often yields noticeable
+improvements under noise【74†L241-L250】. GCE/Symmetric CE come next. Co-teaching and label
+smoothing give smaller, less consistent gains. Tuning the CE temperature (making it “softer”) can also
+help slightly. We will likely try Bi-Tempered and/or Symmetric CE with temperatures tuned, as these have
+credible evidence of boosting F1 in noisy settings.
+4. Data augmentation & regularization (train-time
+only)
+Under offline evaluation, training-time regularization must be used (no test-set tricks). R-Dropout
+(consistency between dropout samples【93†L25-L33】) is reported to yield substantial gains: for
+example, NeurIPS’21 R-Drop paper found “substantial improvements” on fine-tuning large models
+(RoBERTa-large, etc.)【93†L25-L33】. In practice, R-Drop is easy to implement (double forward + KL loss)
+and likely to give a small F1 bump (~1–2%).
+Adversarial training (FGM/AWP) is also popular. Our own AWP trial gave +0.005–0.007 F1. Kaggle
+solutions confirm AWP yields small but consistent boosts (one reported +0.01 CV【100†L283-L289】).
+FGM (single-step embedding noise) is cheaper and may help similarly. AWP (perturb weights) gave up to
++0.002–0.01 on text tasks【100†L283-L289】, at higher compute cost. These are worth trying given the
+gain/effort ratio.
+EDA/back-translation augmentations often help smaller datasets【95†L29-L38】, but our data is
+moderately large (70k) and code-mixed. Synonym replacement in Korean/English may help a bit, but
+gains are likely <0.5% and implementing good Korean augmentation is tricky. Back-translation (KR⇆EN)
+might introduce noise (esp. code terms). Mixup/Manifold-Mixup for text is less proven: some papers
+suggest benefits in low-data regimes【90†L1-L7】, but for short code-mixed text it is uncertain. Overall,
+2
+
+===== PAGE 3 =====
+we rank R-Drop and adversarial noise highest (reliable small gains【93†L25-L33】【39†L229-L235】),
+while EDA/backtrans or mixup are lower-priority (low effort vs uncertain gain).
+5. Calibration and ensembling
+Threshold/logit tuning: Because metric is macro-F1, the decision threshold per class matters. A
+common Kaggle trick is to “tune F1 thresholds” on validation or adjust output biases. In our case, we
+already saw +0.005 F1 from logit‐bias shifts per class. Further refining by optimizing each class’s cutoff
+(or using e.g. coordinate ascent on F1) can squeeze a bit more (usually <+0.01 total). Menon’s logit-
+adjustment (theoretically optimal under known priors) could be attempted, but simpler grid-search on
+OOF is fine.
+Ensembling: Multi-seed and multi-model ensembling often yields the largest gains (1–3%). Kagglers
+average many runs: e.g. some solutions report up to 38 models ensembled【101†L218-L226】. Even a 3-
+seed ensemble of XLM-R or ModernBERT can give ~+0.5–1% F1 by reducing variance. Stronger is to add
+diverse models: e.g. ensemble XLM-R-base, ModernBERT, a small Korean model, etc. Two known
+ensembling strategies are (a) simple weighted average of softmax outputs and (b) Weighted Box Fusion
+(treating outputs like bounding boxes)【100†L232-L240】. Stacking (learning a meta‐model) has also
+been used (e.g. linear regression on OOF preds)【100†L232-L240】【101†L218-L226】. In practice,
+even a flat average of 5–10 strong models can add ~+1–2% macro-F1.
+Given constraints (1GB offline), we must limit ensemble size. Multi-seed (same model, different seeds) is
+cheapest – we can do 3–5 seeds easily. Multi-model (e.g. one ModernBERT, one XLM-R, one Korean BERT)
+adds robustness but each model costs memory. A final option is distillation: train a single smaller model
+on pseudo-labels generated by the ensemble. This “knowledge distillation” can capture ensemble gains
+in one model for inference, though distillation itself may be complex. It’s worth considering if the
+ensemble approach is too heavy; indeed, some top teams have distilled multi-model ensembles into one
+final network.
+6. Technique ranking table
+≤1GB/
+Est’d F1
+Technique What/Why Effort T4/ Source(s)
+gain
+offline?
++0.5–2% High 【100†L232-
+Ensemble Average/fuse
+(often (train L240】
+(multi-seed/ outputs of many Yes
+largest many 【101†L218-
+multi-model) fine-tuned models
+boost) models) L226】
+Freeze large ≈+0.5– Med– Partially
+LoRA-tuned 【49†L72-
+decoder + add 1% (to High (0.5B ok;
+small LLM (e.g. L81】【51†L7-
+LoRA adapters & beat XLM- (fine- >1B
+Qwen0.6B) L10】
+head R) tuning) heavy)
+3
+
+===== PAGE 4 =====
+≤1GB/
+Est’d F1
+Technique What/Why Effort T4/ Source(s)
+gain
+offline?
+New fast encoder
+【45†L39-
+(149M) Low
+ModernBERT- ≈+0.5– L44】
+outperforming (replace Yes
+base 1% 【48†L662-
+older BERT/ model)
+L670】
+DeBERTa
+【74†L241-
+Bounded/heavy- ≈+1–3% Med
+Bi-Tempered L250】
+tailed softmax loss (noise (custom Yes
+Logistic Loss 【71†L173-
+for noisy labels cases) loss)
+L181】
+Force consistency
+R-Drop Low
+between two 【93†L25-
+(dropout +0.5–1% (double Yes
+dropout-forward L33】
+consistency) forward)
+passes
+【78†L29-
+Robust losses Low
+Symmetric/GCE L38】
+interpolating CE +0.5–1% (replace Yes
+loss 【83†L29-
+and MAE CE)
+L38】
+Add small 【39†L229-
+Adversarial
+perturbations Med (adv L235】
+training (AWP/ +0.2–1% Yes
+(weights or steps) 【100†L279-
+FGM)
+embeddings) L287】
+Optimize class 【39†L229-
+Threshold
+thresholds or add Low (grid L235】
+tuning / logit +0.5–1% Yes
+class-specific search) 【100†L283-
+bias
+biases L289】
+Use strong
+GTE/E5 【54†L33-
+multilingual Low (train
+embeddings + ~0–0.5% Yes L42】【55†L0-
+embeddings + head)
+classifier L2】
+simple head
+Label Smooth labels /
+(common
+smoothing / CE soften CE for mild +0–0.5% Low Yes
+knowledge)
+tempering robustness
+Use KoBERT/
+Korean- (see KLUE
+KoELECTRA etc. for ~0–0.5% Low Yes
+specialized PLM benchmarks)
+Korean text
+Augment text via Medium 【95†L29-
+EDA/back-
+synonym swaps or ~0–0.5% (extra Yes L38】 (small
+translation
+MT data) data)
+4
+
+===== PAGE 5 =====
+≤1GB/
+Est’d F1
+Technique What/Why Effort T4/ Source(s)
+gain
+offline?
+Mix training
+Mixup / examples/hidden (limited
+~0–0.5% Medium Yes
+manifold mixup states (less evidence)
+common for text)
+Note: Gains are indicative and may overlap. “Fit” indicates whether technique easily meets size/compute
+limits (model size ≤1GB, offline inference on a T4).
+7. Missed techniques and step-changes
+We must emphasize what’s not viable here. Notably, test-set pseudo-labeling or transductive tricks are
+disallowed, which in some competitions gave multi-point boosts. Semi-supervised methods (e.g.
+pseudo‐labels on unlabeled data) can yield large gains【100†L327-L335】 but are blocked since the
+test is hidden. Knowledge distillation from an ensemble to a single model is a possible way to “squeeze”
+ensemble gains into one model – we flagged it via ensembling, but it might deserve a strategy note if
+ensemble F1 is high but we need a single model.
+No other radical “step-change” (like a completely new paradigm) is evident that we’ve missed. Methods
+like multi-task learning or chain-of-thought prompting don’t apply. All major winning tactics (ensembles,
+adv training, robust loss) have been covered.
+8. Verdict and highest-leverage path
+Reaching ~0.776 macro-F1 appears extremely ambitious given the noted noise ceiling (~0.5 F1 on a large
+subset). Top-12 score is ~0.776, so far above our 0.690. Achieving it offline without test leakage likely
+requires maximal ensembling and all of the above gains. In practice, pushing from 0.69 to 0.776 is a >10%
+relative jump. Our noise analysis suggests some 40% of examples are inherently ambiguous; unless that
+noise was unevenly distributed, even a perfect model might not exceed ~0.80.
+Thus 0.776 may be at or slightly beyond the noise limit. The highest-leverage path is an extensive
+ensemble of carefully fine-tuned models (using R-Drop, AWP, robust loss, etc.), with tuned thresholds and
+possibly distilled into a final model. In other words, combine as many of the above gains as possible. If
+we must pick one single path, it’s aggressive ensembling of diverse, robustly-trained encoders: for
+example, fine-tune ModernBERT-base, XLM-R-large, a LoRA-Qwen, and a Korean BERT (each with R-
+Drop+AWP+tempered loss), then average them. This wide net has the best chance to hit ~0.776. But be
+warned: the improvements beyond ~0.75 F1 may be marginal given noise. Every percentage point past
+~0.75 will be very hard.
+In summary: focus on scalable, proven techniques – new compact encoders (ModernBERT or LoRA
+LLM), robust loss, consistency/adv training, then exploit ensembles and threshold tuning. These are the
+concrete strategies with evidence of real gains【39†L237-L239】【100†L232-L240】【93†L25-L33】
+【74†L241-L250】. With them combined, one may approach the high 0.70’s F1, but breaking 0.776 will
+likely require miraculous label consistency or unlabeled data tricks (not allowed). Handle the ambiguous
+classes as best as possible, but prioritize moving all classes up consistently.
+5
+
+===== PAGE 6 =====
+Sources: Recent Kaggle/DACON write-ups and NeurIPS/ICLR papers as cited above【39†L237-L239】
+【100†L232-L240】【93†L25-L33】【74†L241-L250】【49†L72-L81】【51†L7-L10】【48†L662-
+L670】【54†L33-L42】【95†L29-L38】.
+6

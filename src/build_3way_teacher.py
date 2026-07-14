@@ -8,7 +8,7 @@ import json
 
 import numpy as np
 
-ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 OUT = r"C:\Users\joon2\Desktop\da2\artifacts\teacher_logits_3way.npz"
 W = {"qwen3_smoke": 0.40, "xlmr_v2_rdrop_lr4_e4": 0.27, "mmbert_v2": 0.33}
 

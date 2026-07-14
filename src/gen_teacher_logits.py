@@ -19,7 +19,7 @@ import torch
 from peft import PeftModel
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-DACON = r"C:\Users\joon2\Desktop\dacon"
+DACON = r"C:\Users\joon2\Desktop\da2"
 DA2_ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 
 

@@ -1,20 +1,20 @@
 ﻿# 제출 체크리스트 & 패키징
 
-> 07-12 개정: 제출 경로를 이전 프로젝트의 검증된 도구(`dacon/work/`)로 통일.
+> 07-12 개정: 제출 경로를 이전 프로젝트의 검증된 도구(`work/`)로 통일.
 > 서버 실측치는 이전 프로젝트 제출 12회에서 확보된 값.
 
-## 패키징 — dacon/work/package_multi.py 사용
+## 패키징 — work/package_multi.py 사용
 
 Qwen 제출은 직접 zip을 만들지 말고 검증된 패키저를 쓴다 (rope_theta 복원, tokenizer
 `extra_special_tokens` 픽스, 라벨 순서 assert, vocab_remap, au_bias 동봉이 전부 자동):
 
 ```powershell
 # 1) 임베딩 프루닝 (988MB → ~740MB, 로짓 비트 동일 검증 포함)
-python C:\Users\joon2\Desktop\dacon\work\prune_qwen.py <model_dir_name>
+python work\prune_qwen.py <model_dir_name>
 # 2) 패키징 (MODELS 변수를 대상 모델로 수정 후)
-python C:\Users\joon2\Desktop\dacon\work\package_multi.py --req_tf451 --au --out submit_xxx.zip
+python work\package_multi.py --req_tf451 --au --out submit_xxx.zip
 # 3) T4 추론 시간 추정
-python C:\Users\joon2\Desktop\dacon\work\bench_infer.py --model artifacts\models\<name>
+python work\bench_infer.py --model artifacts\models\<name>
 ```
 
 zip 구조: `model/` + `script.py` + `requirements.txt` (+ `au_bias.json`, `vocab_remap.npy`, `featurize.py`) — 전부 zip 루트.

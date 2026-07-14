@@ -17,12 +17,12 @@ from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
                           DataCollatorWithPadding, Trainer, TrainingArguments,
                           set_seed)
 
-DACON_ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+DACON_ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 
 
 def get_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--model", default=r"C:\Users\joon2\Desktop\dacon\pretrained\Qwen3-0.6B-Base")
+    p.add_argument("--model", default=r"C:\Users\joon2\Desktop\da2\pretrained\Qwen3-0.6B-Base")
     p.add_argument("--fold", type=int, default=0)
     p.add_argument("--tau", type=float, default=1.0)
     p.add_argument("--max_len", type=int, default=512)

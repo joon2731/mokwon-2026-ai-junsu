@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 
-ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 classes = json.load(open(ART + r"\classes.json", encoding="utf-8"))
 C = len(classes)
 

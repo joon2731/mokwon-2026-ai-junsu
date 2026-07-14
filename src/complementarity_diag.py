@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import f1_score
 
-OOF = r"C:\Users\joon2\Desktop\dacon\artifacts\oof"
-ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+OOF = r"C:\Users\joon2\Desktop\da2\artifacts\oof"
+ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 classes = json.load(open(f"{ART}/classes.json", encoding="utf-8"))
 GROUP = {
     "glob_pattern": "nav", "grep_search": "nav", "list_directory": "nav", "read_file": "nav",

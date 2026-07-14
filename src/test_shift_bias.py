@@ -15,7 +15,7 @@ import pandas as pd
 sys.path.insert(0, r"C:\Users\joon2\Desktop\da2\src")
 from evaluate import fast_macro_f1, tune_biases
 
-ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 N_DRAWS = 10
 AU_SHARE = 0.15
 

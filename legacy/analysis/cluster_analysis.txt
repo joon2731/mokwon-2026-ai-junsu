@@ -1,0 +1,174 @@
+
+######################################################################
+# CLUSTER 'nav': ['read_file', 'grep_search', 'glob_pattern', 'list_directory']  (n=28782)
+######################################################################
+
+[Distinctive prompt words per class]  (word: P(class|word), count)
+  -> read_file:
+       보고싶은데          P=0.62  n=48
+       났네             P=0.56  n=43
+       validation     P=0.51  n=57
+       읽어봐            P=0.50  n=52
+       explore        P=0.50  n=40
+       단계가            P=0.49  n=53
+       캐시             P=0.48  n=95
+       타입             P=0.47  n=59
+       서버             P=0.47  n=43
+       경로를            P=0.46  n=41
+       frontend       P=0.46  n=41
+       참고하게           P=0.45  n=53
+  -> grep_search:
+       변수가            P=0.54  n=54
+       health         P=0.53  n=45
+       카드             P=0.53  n=53
+       subcommand     P=0.52  n=42
+       하드코딩된          P=0.51  n=47
+       timeout        P=0.50  n=54
+       훑어줄래           P=0.50  n=52
+       없이             P=0.50  n=44
+       source         P=0.49  n=53
+       시작하는           P=0.49  n=45
+       이라는            P=0.49  n=43
+       관련된            P=0.49  n=43
+  -> glob_pattern:
+       cant           P=0.39  n=51
+       추가할            P=0.35  n=43
+       미들웨어           P=0.33  n=45
+       컴포넌트부터         P=0.33  n=42
+       server         P=0.33  n=52
+       들었어            P=0.32  n=44
+       ldflags        P=0.32  n=57
+       여기저기           P=0.31  n=45
+       쓰는지부터          P=0.30  n=43
+       support        P=0.30  n=60
+       notebook       P=0.30  n=60
+       아바타            P=0.30  n=40
+  -> list_directory:
+       제각각이라          P=0.30  n=43
+       logging        P=0.30  n=54
+       괜찮으면요          P=0.30  n=44
+       되네             P=0.29  n=48
+       때문에            P=0.28  n=57
+       추가할            P=0.28  n=43
+       간단히요           P=0.28  n=43
+       자리             P=0.27  n=41
+       어쩌고            P=0.27  n=41
+       ll             P=0.26  n=53
+       모르겠는데          P=0.26  n=42
+       거라             P=0.26  n=42
+
+[Metadata by class]  tier/lang/ci  &  turn_index mean
+  read_file        turn~4.5 open~0.56 | tier={'pro': 4944, 'free': 2696, 'enterprise': 1617} | ci={'none': 2694, 'passed': 3820, 'failed': 2743}
+  grep_search      turn~5.3 open~0.79 | tier={'enterprise': 1550, 'pro': 5448, 'free': 2914} | ci={'none': 2913, 'passed': 3826, 'failed': 3173}
+  glob_pattern     turn~5.7 open~0.68 | tier={'pro': 2948, 'free': 1530, 'enterprise': 806} | ci={'passed': 1997, 'none': 1654, 'failed': 1633}
+  list_directory   turn~2.8 open~0.23 | tier={'free': 1307, 'pro': 2365, 'enterprise': 657} | ci={'failed': 1311, 'passed': 1562, 'none': 1456}
+
+[Last history action -> class share]
+  last=NONE             (n= 4919) -> read_file:30%, grep_search:21%, glob_pattern:12%, list_directory:37%
+  last=grep_search      (n= 4911) -> read_file:37%, grep_search:35%, glob_pattern:24%, list_directory:4%
+  last=read_file        (n= 3263) -> read_file:38%, grep_search:41%, glob_pattern:17%, list_directory:4%
+  last=glob_pattern     (n= 3088) -> read_file:25%, grep_search:36%, glob_pattern:28%, list_directory:11%
+  last=list_directory   (n= 2766) -> read_file:38%, grep_search:33%, glob_pattern:16%, list_directory:13%
+  last=edit_file        (n= 2372) -> read_file:27%, grep_search:42%, glob_pattern:24%, list_directory:7%
+
+######################################################################
+# CLUSTER 'verify': ['run_tests', 'lint_or_typecheck', 'run_bash']  (n=11912)
+######################################################################
+
+[Distinctive prompt words per class]  (word: P(class|word), count)
+  -> run_tests:
+       view           P=0.63  n=43
+       requirements   P=0.57  n=44
+       yeah           P=0.55  n=47
+       그나저나           P=0.54  n=69
+       dags           P=0.53  n=45
+       돌려봐요           P=0.53  n=94
+       빨갛게            P=0.53  n=59
+       auth           P=0.52  n=93
+       디렉토리           P=0.51  n=41
+       천천히            P=0.51  n=92
+       since          P=0.51  n=49
+       runner         P=0.51  n=49
+  -> lint_or_typecheck:
+       말인데            P=0.47  n=60
+       api            P=0.36  n=42
+       tell           P=0.35  n=43
+       버튼             P=0.33  n=45
+       over           P=0.32  n=84
+       같은             P=0.32  n=100
+       routes         P=0.31  n=58
+       정적분석도          P=0.31  n=59
+       수도             P=0.30  n=40
+       against        P=0.30  n=44
+       way            P=0.29  n=41
+       dir            P=0.29  n=84
+  -> run_bash:
+       실제             P=0.67  n=48
+       terraform      P=0.63  n=41
+       doesn          P=0.60  n=43
+       출력             P=0.60  n=47
+       metro          P=0.59  n=49
+       나오는지           P=0.59  n=41
+       server         P=0.58  n=65
+       바로             P=0.58  n=43
+       빌드도            P=0.55  n=40
+       wanna          P=0.54  n=59
+       compile        P=0.54  n=48
+       되나             P=0.54  n=87
+
+[Metadata by class]  tier/lang/ci  &  turn_index mean
+  run_tests        turn~6.4 open~1.06 | tier={'enterprise': 723, 'free': 1362, 'pro': 2476} | ci={'passed': 1816, 'failed': 1811, 'none': 934}
+  lint_or_typecheck turn~7.2 open~1.08 | tier={'enterprise': 389, 'pro': 1204, 'free': 690} | ci={'passed': 981, 'failed': 843, 'none': 459}
+  run_bash         turn~4.2 open~0.67 | tier={'free': 1552, 'pro': 2677, 'enterprise': 839} | ci={'passed': 1965, 'failed': 1536, 'none': 1567}
+
+[Last history action -> class share]
+  last=edit_file        (n= 3910) -> run_tests:63%, lint_or_typecheck:19%, run_bash:19%
+  last=apply_patch      (n= 1689) -> run_tests:39%, lint_or_typecheck:45%, run_bash:16%
+  last=run_bash         (n= 1308) -> run_tests:15%, lint_or_typecheck:10%, run_bash:75%
+  last=NONE             (n= 1203) -> run_tests:10%, lint_or_typecheck:6%, run_bash:84%
+  last=read_file        (n=  815) -> run_tests:23%, lint_or_typecheck:12%, run_bash:66%
+  last=run_tests        (n=  760) -> run_tests:61%, lint_or_typecheck:19%, run_bash:19%
+
+######################################################################
+# CLUSTER 'comm': ['ask_user', 'plan_task', 'web_search']  (n=6653)
+######################################################################
+
+[Distinctive prompt words per class]  (word: P(class|word), count)
+  -> ask_user:
+       assertionerror P=0.70  n=84
+       typeerror      P=0.68  n=81
+       nonetype       P=0.68  n=81
+       figure         P=0.64  n=58
+       너가             P=0.64  n=44
+       나는데            P=0.61  n=107
+       stuck          P=0.61  n=56
+       hitting        P=0.61  n=61
+       막혔는데           P=0.60  n=93
+       때문에            P=0.60  n=97
+       풀어야            P=0.59  n=71
+       도와줄래           P=0.59  n=209
+  -> plan_task:
+       args           P=0.65  n=40
+       parser         P=0.61  n=56
+       토글             P=0.59  n=63
+       nothing        P=0.58  n=43
+       규모가            P=0.57  n=40
+       practice       P=0.57  n=47
+       추가             P=0.57  n=46
+       건드리기           P=0.55  n=47
+       복잡하니까          P=0.55  n=44
+       어디             P=0.54  n=68
+       정리             P=0.54  n=46
+       두는             P=0.54  n=50
+  -> web_search:
+       함수             P=0.35  n=40
+       import         P=0.35  n=43
+       의존성            P=0.33  n=48
+       모르겠어요          P=0.33  n=45
+       해줘             P=0.33  n=70
+       그대로            P=0.33  n=43
+       버전이            P=0.33  n=40
+       최신             P=0.32  n=119
+       공식             P=0.32  n=184
+       베스트프랙티스        P=0.31  n=54
+       중에             P=0.31  n=45

@@ -57,7 +57,7 @@
 ## 핵심 구조적 사실
 
 1. **세션 구조**: 70,000샘플 = **9,429 세션** × 스텝(최대 18). 같은 세션의 스텝들은 history가 서로 포함관계 → **랜덤 split 시 leakage. CV는 session_id(= id에서 `-step_NN` 제거) 기준 GroupKFold 필수.**
-   - Qwen 계열 실험은 이전 프로젝트 스플릿(`dacon/artifacts/train_prepared.parquet`의 fold 컬럼)을 사용 — 기존 OOF/모델과 정합 유지. da2의 `artifacts/splits.csv`는 자체 실험(E000~)용.
+   - Qwen 계열 실험은 이전 프로젝트 스플릿(`artifacts/train_prepared.parquet`의 fold 컬럼)을 사용 — 기존 OOF/모델과 정합 유지. da2의 `artifacts/splits.csv`는 자체 실험(E000~)용.
 1-b. **두 개의 데이터 소스**: id 프리픽스가 `sess_sim_20260522_*` (64,975행, 92.8%)와 **`sess_au_*` (5,025행 / 1,099세션, 7.2%)** 로 나뉜다. au는 레이블 분포가 크게 다르고(read_file 25.7% 등, L1거리 0.42) 히스토리가 짧다. **테스트에선 au 비중 ~15%로 추정**(au prior 제출 실험의 이득이 OOF 예측의 2.4배였던 것에서 역산) → au 턴버킷 prior 보정이 LB +0.0055.
 1-c. **숨은 테스트셋 실측**(이전 프로젝트 제출로 확정): **~30k 샘플, 세션당 1스텝만, train 세션과 완전 분리** (train↔test 세션 overlay 프로브 명중 0건 × 2회).
 2. **history는 최근 6쌍(12엔트리)으로 캡**: 길이 분포 {0, 2, 4, ..., 12}, turn_index≥7이면 전부 12. user/assistant_action 엄격 교대 (각 242,532개).

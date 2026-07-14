@@ -11,7 +11,7 @@ import json
 
 import numpy as np
 
-ART = r"C:\Users\joon2\Desktop\dacon\artifacts"
+ART = r"C:\Users\joon2\Desktop\da2\artifacts"
 OUT = r"C:\Users\joon2\Desktop\da2\artifacts\teacher_logits.npz"
 W_QWEN = 0.6
 

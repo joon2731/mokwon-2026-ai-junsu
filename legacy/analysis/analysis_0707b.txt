@@ -1,0 +1,51 @@
+ids not matching 'sess_sim_YYYYMMDD_NUM-step_NN': 5025
+    sess_au_001215_001-step_01
+    sess_au_001215_001-step_02
+    sess_au_001215_001-step_03
+    sess_au_001215_001-step_04
+    sess_au_001215_001-step_05
+    sess_au_001215_001-step_06
+    sess_au_001215_001-step_07
+    sess_au_001215_001-step_08
+    sess_au_002748_004-step_01
+    sess_au_002748_004-step_02
+general '<prefix>_NUM-step_NN' matches: 70000/70000
+prefixes: {'sess_sim_20260522': 64975, 'sess_au_921777': 34, 'sess_au_071160': 31, 'sess_au_078464': 29, 'sess_au_550259': 29, 'sess_au_913617': 29}
+label-dist L1 dev across session-number deciles: max=0.2819 (<0.02 = 신호 없음)
+local test stub: 5 rows, train과 세션 겹침 = 5
+    overlap: sess_sim_20260522_006284-step_01
+    overlap: sess_sim_20260522_002193-step_06
+    overlap: sess_sim_20260522_027895-step_06
+    overlap: sess_sim_20260522_025078-step_06
+    overlap: sess_sim_20260522_014415-step_06
+
+== purity by group size: prompt skeleton ==
+  n= 2-2: groups= 2479 rows=  4958 가중순도=0.7313  완전순수그룹비율=0.463
+  n= 3-4: groups= 1133 rows=  3665 가중순도=0.7070  완전순수그룹비율=0.299
+  n= 5-9: groups=  122 rows=   692 가중순도=0.6879  완전순수그룹비율=0.246
+  n=10-19: groups=   10 rows=   132 가중순도=0.9167  완전순수그룹비율=0.700
+  n=20-+: groups=   16 rows=  1063 가중순도=1.0000  완전순수그룹비율=1.000
+  전체 dup rows=10510  가중순도=0.7495
+  singleton groups: 59490 (94.1% of groups)
+
+== purity by group size: full serialized text (V2) ==
+  n=2-2: (없음)
+  n=3-4: (없음)
+  n=5-9: (없음)
+  n=10-19: (없음)
+  n=20-1000000000: (없음)
+  singleton groups: 70000 (100.0% of groups)
+
+== 불순 dup 그룹의 클래스 충돌 top12 ==
+  edit_file          vs apply_patch        190
+  run_bash           vs run_tests          173
+  run_tests          vs run_bash           155
+  read_file          vs grep_search        150
+  grep_search        vs read_file          146
+  ask_user           vs plan_task          111
+  apply_patch        vs edit_file          106
+  grep_search        vs list_directory     100
+  grep_search        vs glob_pattern       99
+  run_bash           vs lint_or_typecheck  89
+  plan_task          vs ask_user           89
+  read_file          vs glob_pattern       72
