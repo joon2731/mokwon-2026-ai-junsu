@@ -13,16 +13,20 @@
 - **3-way 재증류 LB 0.7732569963 확정** → E103(0.77264) 대비 **+0.0006**, 최종 후보 교체. 교사 다양화(Qwen3×XLM-R → +mmBERT)의 LB 이득 실증 (E105)
 - balanced softmax는 이미 기각(fold0 0.7595 = 기준 −0.008). sqrt CE 확정
 
-**지금 돌아가는 것**: **E107 혼동집합 조건부 CE λ=0.3 fold0** (`src/train_group_ce.py`, 13:58 발사, **~17:20 완료**). 로그 `da2/artifacts/qwen3_groupce03_fold0.log`, **게이트 MACRO-F1 ≥ 0.7699**. CE_total = CE14 + 0.3·CE_group(정답 그룹 내부만 재-softmax), 추론비용 0. 그룹: nav/verify/dialogue/modify + web(단독). 로직 단위검증·발사 정상 확인.
+**밤샘 자동 체인 (23:54 가동, overnight_chain.sh)**: ① R-Drop fold0 종료 대기(~02:25, **02:40 하드캡** — 스톨 시 킬+trainer_state에서 에폭 eval 회수) → 판정 기록 ② **seed-777 재증류 full-data 발사**(E105 레시피 그대로, seed만 42→777, ~4.5h→07:00) ③ prune → **au×0.7 패키징**(`submit_s777_au07.zip`) → 드라이런 → 제출 준비 완료. 로그: `artifacts/qwen3_distill3w_s777.log`, 체인 마일스톤은 태스크 출력 b3wrsut1n.
 
-**준비됨 / 제출 대기**:
-- **au 프로브 2개** — distill3w 베이스 ×0.7/×1.3 (`submit_distill_au07/au13.zip`, 841MB). **au07 드라이런 통과**(4.51.3 로드·submission 5행·au파싱 정상), au13 동일구조. **여유 제출 가능**. au_bias 원본 원복·해시 검증 완료
+**7/15 아침 절차 (사용자)**:
+1. `da2\submit_s777_au07.zip` 존재+드라이런 통과 확인 → **즉시 제출** (늦어도 08:30 전 — 막판 채점 큐 리스크)
+2. 점수 확인: **> 0.77374면 데이콘 최종 선택을 s777으로 교체**, 아니면 au07 유지
+3. 체인 실패 시(zip 없음) 아무것도 안 해도 됨 — **au07 0.77374가 이미 확정 최종**
+4. R-Drop 판정은 기록용 (통과했어도 full-data 8.6h라 마감 내 활용 불가 — 23:50 발견)
 
 **07-14 결정 트리**:
 1. ✅ `submit_distill3w.zip` → LB 0.77326, 교체 완료
 2. ✅ lr 4e-5 게이트 → fold0 0.7633 미달 **기각** (E106)
 3. ✅ **E107 혼동집합 CE fold0 기각** — best(e2) 0.7634 < 게이트 0.7699 (e3 0.7597 하락 = λ0.3 과조정). R107 진단대로 정보한계. full-data 미발사. full-data 스크립트는 보존(`src/train_distill_groupce.py`, 미사용)
-4. ⏳ **R-Drop Qwen3 fold0 (α=1.0) 밤샘 실행 중** — 계획서 마지막 예비카드. 17:35 발사 확인(4.26s/it, OOM 없음), **~23:48 완료**. 게이트 0.7699. 로그 `artifacts/qwen3_rdrop_fold0.log`. 완주 시 게이트 판정 후: 통과→내일 새벽 full-data(train_full.py 레시피+rdrop, 마감 10:00 전), 실패→distill3w 확정
+4. ⏳ **R-Drop Qwen3 fold0 (α=1.0)** — 19:24 발사(E107 저장 1.5h 지연으로 밀림), 4.7s/it(2-forward), **~02:25 완료**. 게이트 0.7699. **단, 23:50 발견: 통과해도 활용 불가** — full-data가 8.6h(6,562스텝×4.7s)라 02:40 발사 시 11시 완료로 마감 초과, fold0 직제출도 ~0.771 예상이라 au07(0.77374) 미달. 순수 기록용
+4b. **잔여 GPU의 마지막 +EV 카드 = seed-777 재증류** (밤샘 체인 ②): 같은 레시피 다른 seed의 LB 재추첨(±0.001~2), max(au07, s777) 선택으로 기대 +0.0005 내외. 같은 레시피라 private 기대값은 동일 — public 선택 편향 무해
    - ⚠️ 기대 낮음: R-Drop은 XLM-R에서 +0.011이나 Qwen2.5에선 +0.0021로 급감. lr↑도 Qwen3 전이 실패(E106). **XLM-R 레버 Qwen3 전이 실패 패턴 반복** — 게이트 통과 확률 낮음. 통과 시에만 내일 새벽 full-data(마감 10:00 전 빠듯하나 가능)
 5. ✅ au_bias 스윕 5점 완료 → **정점 ×0.7 = 0.77374 확정** (au07). 제출 5/10 사용, 5회 남음
 6. **현 확정 최종 후보 = submit_distill_au07.zip 0.77374.** 7/15 아침 최고 LB zip 선택 확인. (R-Drop 통과 시에만 재검토)
