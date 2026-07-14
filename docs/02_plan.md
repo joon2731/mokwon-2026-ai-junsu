@@ -3,21 +3,26 @@
 > 07-12 개정: 이전 작업 폴더 `C:\Users\joon2\Desktop\dacon\`(같은 대회, LB 0.7677에서 중단)의
 > 실험 결과를 반영. 엔진은 Qwen3-0.6B-Base로 확정, 인코더 노선은 제외. 근거 원문: `dacon/PROGRESS.md`.
 
-## ▶ 재개 지침 (07-14 07:45 기준 — 새 세션은 여기부터)
+## ▶ 재개 지침 (07-14 10:25 기준 — 새 세션은 여기부터)
 
-**현재 위치**: LB 최고 **0.7726** (`da2\submit_distill.zip`, 제출 완료·확정). 마감 **7/15 10:00**. 7/14 제출 10회 사용 가능 (아직 0회 사용).
+**현재 위치**: LB 최고 **0.77326** (`da2\submit_distill3w.zip`, 제출#5 확정). 마감 **7/15 10:00**. 7/14 제출 1회 사용(distill3w), **9회 남음**.
 
-**밤 결과 (07-14 아침 판정 완료)**:
-- 3-way 재증류 완주 → **`da2\submit_distill3w.zip` (841MB, 드라이런 통과) 제출 대기** — LB 미확인. 판정: >0.7726이면 최종 후보 교체
-- **balanced softmax 기각** (fold0 0.7595 = 기준 −0.008). 마지막 미검증 학습 레버 소진 — sqrt CE 확정
+**07-14 오전 판정 완료**:
+- **3-way 재증류 LB 0.7732569963 확정** → E103(0.77264) 대비 **+0.0006**, 최종 후보 교체. 교사 다양화(Qwen3×XLM-R → +mmBERT)의 LB 이득 실증 (E105)
+- balanced softmax는 이미 기각(fold0 0.7595 = 기준 −0.008). sqrt CE 확정
 
-**지금 돌아가는 것 (분리 프로세스)**: **lr 4e-5 fold0 프로브** (~11:00 완료) — 로그 `da2/artifacts/qwen3_lr4_fold0.log`, **게이트: MACRO-F1 ≥ 0.7699** (기준 0.7679). 배경: 오차 감사에서 "미검증 드롭" 판정 — XLM-R에선 lr↑가 +0.0098이었음.
+**지금 돌아가는 것**: **E107 혼동집합 조건부 CE λ=0.3 fold0** (`src/train_group_ce.py`, 13:58 발사, **~17:20 완료**). 로그 `da2/artifacts/qwen3_groupce03_fold0.log`, **게이트 MACRO-F1 ≥ 0.7699**. CE_total = CE14 + 0.3·CE_group(정답 그룹 내부만 재-softmax), 추론비용 0. 그룹: nav/verify/dialogue/modify + web(단독). 로직 단위검증·발사 정상 확인.
+
+**준비됨 / 제출 대기**:
+- **au 프로브 2개** — distill3w 베이스 ×0.7/×1.3 (`submit_distill_au07/au13.zip`, 841MB). **au07 드라이런 통과**(4.51.3 로드·submission 5행·au파싱 정상), au13 동일구조. **여유 제출 가능**. au_bias 원본 원복·해시 검증 완료
 
 **07-14 결정 트리**:
-1. `submit_distill3w.zip` 제출 → LB 판정 (교사 3-way 이득 실측)
-2. ~11:00 lr 게이트 판정 → **통과 시**: 오후에 `lr 4e-5 + 3-way 증류` full-data 재학습 (train_distill.py --lr 4e-5, ~4.5h) → 저녁 프루닝·패키징·드라이런·제출. **실패 시**: 예비 카드 = R-Drop Qwen3 fold0(6.4h, Qwen2.5에서 +0.0021 실측이나 게이트로 잘렸던 것) 또는 seed-2 재증류 복권
-3. 여유 제출로 au_bias 스케일 ×0.7 / ×1.3 프로브 (au_bias.json 값 스케일링 후 재패키징, 기대 +0.001~2)
-4. **7/14 밤까지 모든 제출 완료. 7/15 아침 = 데이콘 최종 제출물 선택 확인만 (최고 LB zip 선택)**
+1. ✅ `submit_distill3w.zip` → LB 0.77326, 교체 완료
+2. ✅ lr 4e-5 게이트 → fold0 0.7633 미달 **기각** (E106)
+3. ⏳ **E107 혼동집합 CE fold0 (~17:20)** → **통과 시**: 저녁 full-data 재학습 즉시 발사 → 프루닝·패키징·드라이런·제출. **실패 시**: distill3w 확정
+   - full-data 스크립트 **준비 완료**(문법검증): `python src/train_distill_groupce.py --tag qwen3_distill3w_groupce --group_ce_lambda 0.3 --grad_ckpt` (증류 3-way 교사 0.7754 + group CE, ~4.5h→22시경). 저장 `dacon/artifacts/models/qwen3_distill3w_groupce_full_best`
+4. au 프로브 2개 제출 (여유 제출, 기대 +0.001~2). **distill3w 베이스** 확인
+5. **7/14 밤까지 제출 완료. 7/15 아침 = 최고 LB zip 최종 선택 확인만**
 
 **오차 감사 결론 (07-14)**: 견고한 기각 = Embedding(−0.012)·1.7B(−0.016)·BSM(−0.008)·블렌드(시간 물리벽)·R105/R106(메커니즘). 노이즈-마진/미검증 3건 = **lr 4e-5(지금 실행)**, R-Drop Qwen3(예비), V3 성분 분리(예비, parquet 재구축 필요).
 

@@ -4,6 +4,7 @@ data/
 # 실험 산출물 (스크립트로 재생성 가능)
 artifacts/
 stage/
+stage_*/
 submissions/
 
 # 주최측 베이스라인 압축/전개본
