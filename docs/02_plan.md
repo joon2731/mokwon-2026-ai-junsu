@@ -3,24 +3,27 @@
 > 07-12 개정: 이전 작업 폴더 `C:\Users\joon2\Desktop\dacon\`(같은 대회, LB 0.7677에서 중단)의
 > 실험 결과를 반영. 엔진은 Qwen3-0.6B-Base로 확정, 인코더 노선은 제외. 근거 원문: `dacon/PROGRESS.md`.
 
-## ▶ 재개 지침 (07-14 02:50 기준 — 새 세션은 여기부터)
+## ▶ 재개 지침 (07-14 07:45 기준 — 새 세션은 여기부터)
 
-**현재 위치**: LB 최고 **0.7726** (E103, `da2\submit_distill.zip` = 2-way 교사 증류 모델, 이미 제출·확정). 마감 **7/15 10:00**, 7/14에 제출 10회 가능.
+**현재 위치**: LB 최고 **0.7726** (`da2\submit_distill.zip`, 제출 완료·확정). 마감 **7/15 10:00**. 7/14 제출 10회 사용 가능 (아직 0회 사용).
 
-**지금 돌아가는 것 (분리 프로세스 — 세션 무관하게 진행)**:
-1. `qwen3_distill3w` full-data 재학습 (3-way 교사 0.7754, ~03:40 완료) → 로그 `da2/artifacts/qwen3_distill3w.log`
-2. 완료 시 자동: CPU 프루닝→패키징→드라이런 → **`da2\submit_distill3w.zip` 생성** + `da2/artifacts/prune_3w_done.txt` 마커 (로그 prune_3w.log)
-3. 이어서 balanced softmax fold0 게이트 (~07:00 완료) → 로그 `da2/artifacts/qwen3_bsm_fold0.log`, **판정: MACRO-F1 ≥ 0.7699면 통과**
+**밤 결과 (07-14 아침 판정 완료)**:
+- 3-way 재증류 완주 → **`da2\submit_distill3w.zip` (841MB, 드라이런 통과) 제출 대기** — LB 미확인. 판정: >0.7726이면 최종 후보 교체
+- **balanced softmax 기각** (fold0 0.7595 = 기준 −0.008). 마지막 미검증 학습 레버 소진 — sqrt CE 확정
 
-**07-14 할 일 (순서대로)**:
-1. `da2\submit_distill3w.zip` 제출 → LB가 0.7726 넘으면 신기록·최종 후보 교체
-2. BSM 게이트 판정 → 통과 시 마지막 밤 슬롯 = **BSM full-data 재학습**(train_la.py를 full-data로 — eval 끄고 전체 학습, 필요시 train_full.py 참고해 개조) + 가능하면 3-way 증류 손실과 결합은 하지 말 것(교락 방지, 단일 변경 원칙)
-3. 둘 다 실패 시: 추가 학습 없이 0.7726(또는 distill3w) 확정, 여유 제출로 au_bias 스케일 ×0.7/×1.3 프로브 (기대 +0.001~2)
-4. **7/14 밤까지 모든 제출 완료, 7/15 아침은 데이콘 최종 제출물 선택 확인만** (최고 LB zip 선택)
+**지금 돌아가는 것 (분리 프로세스)**: **lr 4e-5 fold0 프로브** (~11:00 완료) — 로그 `da2/artifacts/qwen3_lr4_fold0.log`, **게이트: MACRO-F1 ≥ 0.7699** (기준 0.7679). 배경: 오차 감사에서 "미검증 드롭" 판정 — XLM-R에선 lr↑가 +0.0098이었음.
 
-**하지 말 것 (전부 실측 기각 — docs/03 R/E 시리즈)**: 블렌드 직접 탑재(시간 초과 실측), 프루닝-블렌드(기대 낮음), result_summary 태그(R105), turn-1 메타 보정(R106), 그 외 상단 기각 목록 전부. **"모델이 텍스트로 읽는 신호의 명시화"는 4회 재현 실패 — 재시도 금지.**
+**07-14 결정 트리**:
+1. `submit_distill3w.zip` 제출 → LB 판정 (교사 3-way 이득 실측)
+2. ~11:00 lr 게이트 판정 → **통과 시**: 오후에 `lr 4e-5 + 3-way 증류` full-data 재학습 (train_distill.py --lr 4e-5, ~4.5h) → 저녁 프루닝·패키징·드라이런·제출. **실패 시**: 예비 카드 = R-Drop Qwen3 fold0(6.4h, Qwen2.5에서 +0.0021 실측이나 게이트로 잘렸던 것) 또는 seed-2 재증류 복권
+3. 여유 제출로 au_bias 스케일 ×0.7 / ×1.3 프로브 (au_bias.json 값 스케일링 후 재패키징, 기대 +0.001~2)
+4. **7/14 밤까지 모든 제출 완료. 7/15 아침 = 데이콘 최종 제출물 선택 확인만 (최고 LB zip 선택)**
 
-**제출 파일 위치**: da2 루트 (`submit_distill.zip`=현 최고 / `submit_distill3w.zip`=아침 제출용 / `submit_full3ep.zip`, `submit_2way.zip`=기록용)
+**오차 감사 결론 (07-14)**: 견고한 기각 = Embedding(−0.012)·1.7B(−0.016)·BSM(−0.008)·블렌드(시간 물리벽)·R105/R106(메커니즘). 노이즈-마진/미검증 3건 = **lr 4e-5(지금 실행)**, R-Drop Qwen3(예비), V3 성분 분리(예비, parquet 재구축 필요).
+
+**하지 말 것**: 블렌드 직접 탑재(시간 초과 실측), result_summary 태그(R105), turn-1 메타(R106), 상단 기각 목록 전부. **"모델이 텍스트로 읽는 신호의 명시화" 4회 실패 — 재시도 금지.** package_multi.py의 MODELS/MODEL_WEIGHTS는 실험 후 즉시 원복(07-14 assert 사고).
+
+**제출 파일 위치**: da2 루트 (`submit_distill.zip`=현 최고 0.7726 / `submit_distill3w.zip`=제출 대기 / full3ep·2way=기록용)
 
 ## 목표와 현실
 
