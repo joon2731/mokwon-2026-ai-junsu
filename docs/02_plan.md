@@ -13,9 +13,11 @@
 - **3-way 재증류 LB 0.7732569963 확정** → E103(0.77264) 대비 **+0.0006**, 최종 후보 교체. 교사 다양화(Qwen3×XLM-R → +mmBERT)의 LB 이득 실증 (E105)
 - balanced softmax는 이미 기각(fold0 0.7595 = 기준 −0.008). sqrt CE 확정
 
-**🏁 종료 (07-15 04:00) — 모든 실험 중단, 최종 확정**
+**🏁 종료 (07-15 04:00) — 모든 실험 중단, 최종 확정. 복기는 [docs/05_retrospective.md](05_retrospective.md)**
 
 **최종 제출물 = `submit_distill_au07.zip` = LB 0.77374** (distill3w + au_bias×0.7). **이미 데이콘 서버에 제출 완료**. 남은 할 일: 마감(10:00) 전 데이콘에서 최종 선택이 이 제출본인지 확인만.
+
+**저장소 정리 (07-15)**: 실패 실험 모델 109개(241GB)·미사용 zip 6개·기각 pretrained 5개(9.8GB) 삭제 → 디스크 253GB 회수. **보존**: 최종 모델(distill3w full_best + pruned) · OOF 5-fold×3모델(분석용) · 학습데이터(parquet/data) · teacher_logits_3way.npz · Qwen3-0.6B-Base · au07 zip · 코드 전부. 재현 절차는 복기 문서 §7 참조.
 
 **마지막 밤 경과**:
 - R-Drop fold0 = **0.7636 기각** (게이트 미달). 애초에 full-data 8.6h라 마감 내 활용도 불가였음

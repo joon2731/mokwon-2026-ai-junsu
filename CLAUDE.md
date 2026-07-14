@@ -7,9 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 데이콘 **2026 AI·SW중심대학 디지털 경진대회 AI부문** 참가 리포지토리 (https://dacon.io/competitions/official/236694).
 AI 코딩 에이전트 세션 로그(`current_prompt` + `history` + `session_meta`)를 입력으로 **다음 행동(action)을 14개 클래스 중 하나로 분류**한다. 평가지표는 **Macro-F1**.
 
-- **목표: LB 0.80** (07-12 상향. 참고: 본선컷 12위 0.79307 / 1위 0.79795, 868팀 — 상위 20팀 0.791~0.798 초접전)
-- **예선 마감: 2026-07-15 10:00**, 제출 일 10회 제한
-- 작업 시작 전 필독: [docs/02_plan.md](docs/02_plan.md) (전략·일정), 실험은 반드시 [docs/03_experiments.md](docs/03_experiments.md)에 기록
+## ✅ 예선 종료 (2026-07-15) — 현재는 복기·학습 단계
+
+- **최종 LB 0.77374** (`submit_distill_au07.zip` = Qwen3-0.6B full-data + 3-way 교사 증류 + au_bias×0.7). 본선컷 0.79307 미달
+- **📖 복기·비교 분석은 [docs/05_retrospective.md](docs/05_retrospective.md) 부터 읽을 것** — 점수 경로, 기각 목록 전체, R107 오차 진단(천장의 정체), **수상팀 코드 나오면 확인할 8가지 질문**, 재현 절차, 남긴 자산 목록
+- 저장소 정리 완료: 실패 실험 산출물 삭제(253GB 회수), **최종 제출물·최종 모델·OOF·학습데이터·코드는 보존** (복기 문서 §7)
+- 앞으로의 작업: 수상팀 코드 공개 시 §6 질문에 답을 채우는 비교 분석
 
 ## 핵심 제약 — 코드 제출 대회
 
