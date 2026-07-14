@@ -100,7 +100,8 @@
 - 변경점: `L = CE14 + λ·CE_group`, λ=0.3. CE_group = 정답이 속한 혼동그룹 내부만 재-softmax한 (class-weighted) NLL. 그룹: nav(glob/grep/list/read)·verify(lint/run_bash/run_tests)·dialogue(ask/plan/respond)·modify(apply/edit/write)·web(web_search 단독→기여 0)
 - 구현: `da2/src/train_group_ce.py` (dacon/work/train.py 포크, GroupCETrainer.compute_loss에 마스킹 NLL 추가). 마스킹·nll 로직 단위검증 통과(web 단독그룹 nll=0, 전부 유한). 배경: lr 실패로 오후 슬롯 재배정, 사용자 선택
 - 구성: Qwen3-0.6B-Base fold0, 검증 레시피(max_len512·3ep·bs8ga4·lr2e-5·sqrt·bf16·adamw_bnb_8bit·seed42) + group_ce_lambda 0.3. 게이트 fold0 ≥ 0.7699 (기준 0.7679)
-- 결과: (~17:20 기록). 통과 시 저녁 full-data 재학습, 실패 시 distill3w(0.77326) 확정
+- 곡선(eval_macro_f1): e1 0.7155 → **e2 0.7634 (best)** → e3 0.7597. **게이트 0.7699 미달(−0.0065)**, 기준 0.7679 대비 **−0.0045**
+- 결론: **기각**. e3 하락 = group CE(λ0.3) 과조정 신호. R107 진단대로 "큰 병목=초기 nav 정보한계"라 그룹경계 보조손실이 순해로움. full-data 미발사, distill3w(0.77326) 확정. λ 튜닝(0.2) 여지는 있으나 진단상 상방 작음 — 오늘밤 full-data 시간 초과로 보류
 
 ### R107 — 오차 상보성 진단 (07-14 오후, CPU, GPU 학습 중 병행)
 - 목적: 계획서 지목 "미해결 최유력 지점" — oracle(3-way 0.8168)의 상보성이 어느 축에서 오는가. Qwen3/XLM-R/mmBERT 5-fold OOF(70k) 분해. 스크립트 `src/complementarity_diag.py`

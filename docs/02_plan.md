@@ -19,8 +19,11 @@
 **07-14 결정 트리**:
 1. ✅ `submit_distill3w.zip` → LB 0.77326, 교체 완료
 2. ✅ lr 4e-5 게이트 → fold0 0.7633 미달 **기각** (E106)
-3. ⏳ **E107 혼동집합 CE fold0 (~17:20)** → **통과 시**: 저녁 full-data 재학습 즉시 발사 → 프루닝·패키징·드라이런·제출. **실패 시**: distill3w 확정
-   - full-data 스크립트 **준비 완료**(문법검증): `python src/train_distill_groupce.py --tag qwen3_distill3w_groupce --group_ce_lambda 0.3 --grad_ckpt` (증류 3-way 교사 0.7754 + group CE, ~4.5h→22시경). 저장 `dacon/artifacts/models/qwen3_distill3w_groupce_full_best`
+3. ✅ **E107 혼동집합 CE fold0 기각** — best(e2) 0.7634 < 게이트 0.7699 (e3 0.7597 하락 = λ0.3 과조정). R107 진단대로 정보한계. full-data 미발사. full-data 스크립트는 보존(`src/train_distill_groupce.py`, 미사용)
+4. ⏳ **R-Drop Qwen3 fold0 (α=1.0) 밤샘 실행 중** — 계획서 마지막 예비카드. 17:35 발사 확인(4.26s/it, OOM 없음), **~23:48 완료**. 게이트 0.7699. 로그 `artifacts/qwen3_rdrop_fold0.log`. 완주 시 게이트 판정 후: 통과→내일 새벽 full-data(train_full.py 레시피+rdrop, 마감 10:00 전), 실패→distill3w 확정
+   - ⚠️ 기대 낮음: R-Drop은 XLM-R에서 +0.011이나 Qwen2.5에선 +0.0021로 급감. lr↑도 Qwen3 전이 실패(E106). **XLM-R 레버 Qwen3 전이 실패 패턴 반복** — 게이트 통과 확률 낮음. 통과 시에만 내일 새벽 full-data(마감 10:00 전 빠듯하나 가능)
+5. au 프로브 2개 제출 (여유, 기대 +0.001~2). distill3w 베이스 확인
+6. **distill3w 0.77326이 현 확정 최종 후보.** 7/15 아침 최고 LB zip 선택 확인
 4. au 프로브 2개 제출 (여유 제출, 기대 +0.001~2). **distill3w 베이스** 확인
 5. **7/14 밤까지 제출 완료. 7/15 아침 = 최고 LB zip 최종 선택 확인만**
 
